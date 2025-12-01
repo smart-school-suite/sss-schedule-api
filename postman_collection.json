@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "SSS Scheduling API",
+    "description": "Test collection for the OR-Tools School Scheduling API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["health"]
+        },
+        "description": "Check if the API is running"
+      }
+    },
+    {
+      "name": "Root Endpoint",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": [""]
+        },
+        "description": "Get API information"
+      }
+    },
+    {
+      "name": "Schedule WITHOUT Preferences (Simple)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teachers\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"name\": \"Dr. John Smith\"\n    }\n  ],\n  \"teacher_courses\": [\n    {\n      \"course_id\": \"MATH101\",\n      \"course_title\": \"Calculus I\",\n      \"course_credit\": 3,\n      \"course_type\": \"theory\",\n      \"course_hours\": 90,\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. John Smith\"\n    }\n  ],\n  \"halls\": [\n    {\n      \"hall_id\": \"R101\",\n      \"hall_name\": \"Room 101\",\n      \"hall_capacity\": 50,\n      \"hall_type\": \"lecture\"\n    }\n  ],\n  \"teacher_busy_period\": [],\n  \"teacher_prefered_teaching_period\": [],\n  \"hall_busy_periods\": [],\n  \"break_period\": {\n    \"start_time\": \"12:00\",\n    \"end_time\": \"13:00\",\n    \"daily\": true\n  },\n  \"operational_period\": {\n    \"start_time\": \"08:00\",\n    \"end_time\": \"17:00\",\n    \"daily\": true,\n    \"days\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n    \"constrains\": []\n  },\n  \"soft_constrains\": {}\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/schedule/without-preference",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "schedule", "without-preference"]
+        },
+        "description": "Simple schedule: 1 teacher, 1 course (90 min), 1 hall"
+      }
+    },
+    {
+      "name": "Schedule WITH Preferences (Simple)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teachers\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"name\": \"Dr. John Smith\"\n    }\n  ],\n  \"teacher_courses\": [\n    {\n      \"course_id\": \"MATH101\",\n      \"course_title\": \"Calculus I\",\n      \"course_credit\": 3,\n      \"course_type\": \"theory\",\n      \"course_hours\": 90,\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. John Smith\"\n    }\n  ],\n  \"halls\": [\n    {\n      \"hall_id\": \"R101\",\n      \"hall_name\": \"Room 101\",\n      \"hall_capacity\": 50,\n      \"hall_type\": \"lecture\"\n    }\n  ],\n  \"teacher_busy_period\": [],\n  \"teacher_prefered_teaching_period\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. John Smith\",\n      \"day\": \"tuesday\",\n      \"start_time\": \"09:00\",\n      \"end_time\": \"11:00\"\n    }\n  ],\n  \"hall_busy_periods\": [],\n  \"break_period\": {\n    \"start_time\": \"12:00\",\n    \"end_time\": \"13:00\",\n    \"daily\": true\n  },\n  \"operational_period\": {\n    \"start_time\": \"08:00\",\n    \"end_time\": \"17:00\",\n    \"daily\": true,\n    \"days\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n    \"constrains\": []\n  },\n  \"soft_constrains\": {}\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/schedule/with-preference",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "schedule", "with-preference"]
+        },
+        "description": "Schedule respecting teacher preference for Tuesday 9-11am"
+      }
+    },
+    {
+      "name": "Schedule WITHOUT Preferences (Multiple)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teachers\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"name\": \"Dr. Alice Smith\"\n    },\n    {\n      \"teacher_id\": \"T2\",\n      \"name\": \"Prof. Bob Johnson\"\n    }\n  ],\n  \"teacher_courses\": [\n    {\n      \"course_id\": \"MATH101\",\n      \"course_title\": \"Calculus I\",\n      \"course_credit\": 3,\n      \"course_type\": \"theory\",\n      \"course_hours\": 90,\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Alice Smith\"\n    },\n    {\n      \"course_id\": \"PHYS201\",\n      \"course_title\": \"Physics Lab\",\n      \"course_credit\": 4,\n      \"course_type\": \"practical\",\n      \"course_hours\": 120,\n      \"teacher_id\": \"T2\",\n      \"teacher_name\": \"Prof. Bob Johnson\"\n    }\n  ],\n  \"halls\": [\n    {\n      \"hall_id\": \"R101\",\n      \"hall_name\": \"Lecture Hall A\",\n      \"hall_capacity\": 50,\n      \"hall_type\": \"lecture\"\n    },\n    {\n      \"hall_id\": \"LAB1\",\n      \"hall_name\": \"Physics Lab 1\",\n      \"hall_capacity\": 30,\n      \"hall_type\": \"lab\"\n    }\n  ],\n  \"teacher_busy_period\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Alice Smith\",\n      \"day\": \"monday\",\n      \"start_time\": \"15:00\",\n      \"end_time\": \"17:00\"\n    }\n  ],\n  \"teacher_prefered_teaching_period\": [],\n  \"hall_busy_periods\": [],\n  \"break_period\": {\n    \"start_time\": \"12:00\",\n    \"end_time\": \"13:00\",\n    \"daily\": true\n  },\n  \"operational_period\": {\n    \"start_time\": \"08:00\",\n    \"end_time\": \"17:00\",\n    \"daily\": true,\n    \"days\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n    \"constrains\": []\n  },\n  \"soft_constrains\": {}\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/schedule/without-preference",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "schedule", "without-preference"]
+        },
+        "description": "Multiple teachers and courses with teacher busy period"
+      }
+    },
+    {
+      "name": "Test Teacher Busy Period",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teachers\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"name\": \"Dr. Emily Brown\"\n    }\n  ],\n  \"teacher_courses\": [\n    {\n      \"course_id\": \"CHEM101\",\n      \"course_title\": \"General Chemistry\",\n      \"course_credit\": 4,\n      \"course_type\": \"theory\",\n      \"course_hours\": 120,\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Emily Brown\"\n    }\n  ],\n  \"halls\": [\n    {\n      \"hall_id\": \"R202\",\n      \"hall_name\": \"Science Hall\",\n      \"hall_capacity\": 40,\n      \"hall_type\": \"lecture\"\n    }\n  ],\n  \"teacher_busy_period\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Emily Brown\",\n      \"day\": \"monday\",\n      \"start_time\": \"14:00\",\n      \"end_time\": \"17:00\"\n    },\n    {\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Emily Brown\",\n      \"day\": \"wednesday\",\n      \"start_time\": \"08:00\",\n      \"end_time\": \"10:00\"\n    }\n  ],\n  \"teacher_prefered_teaching_period\": [],\n  \"hall_busy_periods\": [],\n  \"break_period\": {\n    \"start_time\": \"12:00\",\n    \"end_time\": \"13:00\",\n    \"daily\": true\n  },\n  \"operational_period\": {\n    \"start_time\": \"08:00\",\n    \"end_time\": \"17:00\",\n    \"daily\": true,\n    \"days\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n    \"constrains\": []\n  },\n  \"soft_constrains\": {}\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/schedule/without-preference",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "schedule", "without-preference"]
+        },
+        "description": "Verify that classes are NOT scheduled during teacher busy periods"
+      }
+    },
+    {
+      "name": "Test Course Type Matching",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teachers\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"name\": \"Dr. Lab Expert\"\n    }\n  ],\n  \"teacher_courses\": [\n    {\n      \"course_id\": \"BIO301\",\n      \"course_title\": \"Biology Lab\",\n      \"course_credit\": 3,\n      \"course_type\": \"practical\",\n      \"course_hours\": 90,\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Lab Expert\"\n    }\n  ],\n  \"halls\": [\n    {\n      \"hall_id\": \"LAB2\",\n      \"hall_name\": \"Biology Lab 2\",\n      \"hall_capacity\": 25,\n      \"hall_type\": \"lab\"\n    },\n    {\n      \"hall_id\": \"R101\",\n      \"hall_name\": \"Lecture Room\",\n      \"hall_capacity\": 50,\n      \"hall_type\": \"lecture\"\n    }\n  ],\n  \"teacher_busy_period\": [],\n  \"teacher_prefered_teaching_period\": [],\n  \"hall_busy_periods\": [],\n  \"break_period\": {\n    \"start_time\": \"12:00\",\n    \"end_time\": \"13:00\",\n    \"daily\": true\n  },\n  \"operational_period\": {\n    \"start_time\": \"08:00\",\n    \"end_time\": \"17:00\",\n    \"daily\": true,\n    \"days\": [\"monday\", \"tuesday\", \"wednesday\"],\n    \"constrains\": []\n  },\n  \"soft_constrains\": {}\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/schedule/without-preference",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "schedule", "without-preference"]
+        },
+        "description": "Practical course should be scheduled in lab, not lecture room"
+      }
+    },
+    {
+      "name": "Test Infeasible Schedule",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teachers\": [\n    {\n      \"teacher_id\": \"T1\",\n      \"name\": \"Dr. Overworked\"\n    }\n  ],\n  \"teacher_courses\": [\n    {\n      \"course_id\": \"COURSE1\",\n      \"course_title\": \"Course 1\",\n      \"course_credit\": 10,\n      \"course_type\": \"theory\",\n      \"course_hours\": 3000,\n      \"teacher_id\": \"T1\",\n      \"teacher_name\": \"Dr. Overworked\"\n    }\n  ],\n  \"halls\": [\n    {\n      \"hall_id\": \"R1\",\n      \"hall_name\": \"Room 1\",\n      \"hall_capacity\": 50,\n      \"hall_type\": \"lecture\"\n    }\n  ],\n  \"teacher_busy_period\": [],\n  \"teacher_prefered_teaching_period\": [],\n  \"hall_busy_periods\": [],\n  \"break_period\": {\n    \"start_time\": \"12:00\",\n    \"end_time\": \"13:00\",\n    \"daily\": true\n  },\n  \"operational_period\": {\n    \"start_time\": \"08:00\",\n    \"end_time\": \"10:00\",\n    \"daily\": true,\n    \"days\": [\"monday\"],\n    \"constrains\": []\n  },\n  \"soft_constrains\": {}\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/schedule/without-preference",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "v1", "schedule", "without-preference"]
+        },
+        "description": "Impossible schedule: 3000 minutes of course in 2 hours of operational time. Should return INFEASIBLE."
+      }
+    }
+  ]
+}

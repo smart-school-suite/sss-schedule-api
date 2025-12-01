@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: scheduling-api
+    ports:
+      - "8080:8080"
+    environment:
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - SOLVER_TIMEOUT_SECONDS=30
+    volumes:
+      - ./examples:/app/examples:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

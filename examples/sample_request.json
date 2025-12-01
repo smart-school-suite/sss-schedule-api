@@ -1,0 +1,164 @@
+{
+    "teacher_prefered_teaching_period": [
+        {
+            "start_time": "14:00",
+            "end_time": "18:00",
+            "day": "monday",
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "teacher_name": "Dr Roland"
+        },
+        {
+            "start_time": "14:00",
+            "end_time": "18:00",
+            "day": "monday",
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "teacher_name": "Dr Roland"
+        }
+    ],
+    "teachers": [
+        {
+            "teacher_id": "0f16fdce-d648-486a-8691-f6439eda3f0e",
+            "name": "Annamarie Murray"
+        }
+    ],
+    "teacher_busy_period": [
+        {
+            "start_time": "12:00",
+            "end_time": "14:00",
+            "day": "monday",
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "teacher_name": "Dr Roland",
+            "course_id": "",
+            "course_code": ""
+        },
+        {
+            "start_time": "12:00",
+            "end_time": "14:00",
+            "day": "monday",
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "teacher_name": "Dr Roland",
+            "course_id": "",
+            "course_code": ""
+        }
+    ],
+    "teacher_courses": [
+        {
+            "course_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "course_title": "Engineering Maths",
+            "course_credit": 4,
+            "course_type": "theory",
+            "course_hours": 30,
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "teacher_name": "Dr Roland"
+        },
+        {
+            "course_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "course_title": "Web Development",
+            "course_credit": 2,
+            "course_hours": 30,
+            "course_type": "Practical",
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "teacher_name": "Dr Roland"
+        }
+    ],
+    "halls": [
+        {
+            "hall_name": "Hall 2",
+            "hall_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "hall_capacity": 500,
+            "hall_type": "lab"
+        },
+        {
+            "hall_name": "Hall 2",
+            "hall_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "hall_capacity": 500,
+            "hall_type": "lecture"
+        }
+    ],
+    "hall_busy_periods": [
+        {
+            "hall_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "hall_name": "",
+            "start_time": "08:00",
+            "end_time": "07:00"
+        }
+    ],
+    "break_period": {
+        "start_time": "12:00",
+        "end_time": "12:45",
+        "daily": "boolean",
+        "constrains": {
+            "daysException": [
+                "monday",
+                "tuesday"
+            ],
+            "daysFixedBreaks": [
+                {
+                    "day": "monday",
+                    "start_time": "11:30",
+                    "end_time": "12:15"
+                }
+            ]
+        }
+    },
+    "operational_period": {
+        "start_time": "07:30",
+        "end_time": "17:00",
+        "daily": "boolean",
+        "days": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+        ],
+        "constrains": [
+            {
+                "day": "monday",
+                "start_time": "07:30",
+                "end_time": "15:00"
+            }
+        ]
+    },
+    "soft_constrains": {
+        "teacher_max_daily_hours": "decimal",
+        "teacher_max_weekly_hours": "decimal",
+        "teacher_minimum_break_between_classes": "integer",
+        "teacher_even_subject_distribution": "boolean",
+        "teacher_balanced_workload": "boolean",
+        "teacher_avoid_split_double_periods": "boolean",
+        "course_load_proportionality": "boolean",
+        "course_avoid_clustering": "boolean",
+        "course_minimum_gap_between_sessions": "boolean",
+        "course_room_suitability": {
+            "theory": "lecture",
+            " practical": "lab"
+        },
+        "course_preferred_time_of_day": {
+            "theory": "morning",
+            "practical": "evening"
+        },
+        "course_credit_hour_density_control": "boolean",
+        "course_spread_across_week": "boolean",
+        "hall_capacity_limit": "boolean",
+        "hall_type_suitability": {
+            "theory": "lecture",
+            "practical": "lab"
+        },
+        "hall_change_minimization": "boolean",
+        "hall_usage_balance": "boolean",
+        "time_max_periods_per_day": "integer",
+        "time_min_free_periods_per_day": "integer",
+        "time_balanced_daily_workload": "boolean",
+        "time_balanced_weekly_workload": "boolean",
+        "time_avoid_consecutive_heavy_subjects": "boolean",
+        "time_consecutive_period_allowance": {
+            "practicals": "boolean",
+            "theory": "boolean"
+        },
+        "time_min_gap_between_sessions": "decimal",
+        "time_subject_frequency_per_day": "integer"
+    }
+}
