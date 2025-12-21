@@ -9,7 +9,7 @@ from ortools.sat.python import cp_model
 from typing import List, Dict, Tuple, Optional, Set
 from models.schemas import (
     SchedulingRequest, SchedulingResponse, DaySchedule, ScheduleSlot,
-    Messages, ErrorMessage
+    Messages, ErrorMessage, AffectedEntity, RootCause
 )
 from datetime import datetime, time, timedelta
 import logging
@@ -126,10 +126,11 @@ class ORToolsScheduler:
                 self.operational_hours[day] = (op_period.start_time, op_period.end_time)
     
     def _build_time_slots(self):
-        """Build discrete time slots for each day."""
-        slot_duration = 30  # Default 30-minute slots (can be made configurable)
-        
+        """Build discrete time slots for each day with configurable duration."""
         for day in self.days:
+            # Get period duration for this day
+            period_duration = self._get_period_duration(day)
+            
             start_str, end_str = self.operational_hours[day]
             start_time = self._parse_time(start_str)
             end_time = self._parse_time(end_str)
@@ -141,7 +142,7 @@ class ORToolsScheduler:
             slot_idx = 0
             
             while current_time < end_time:
-                next_time = self._add_minutes(current_time, slot_duration)
+                next_time = self._add_minutes(current_time, period_duration)
                 if next_time > end_time:
                     next_time = end_time
                 
@@ -156,6 +157,34 @@ class ORToolsScheduler:
             
             self.slots_per_day[day] = slots
             self.slot_times[day] = slot_times
+    
+    def _get_period_duration(self, day: str) -> int:
+        """
+        Get period duration in minutes for a specific day.
+        
+        Logic:
+        1. If periods config exists and day has fixed period, use that
+        2. If periods config exists and daily is true, use default period
+        3. Otherwise, default to 30 minutes
+        """
+        if not self.request.periods:
+            return 30  # Default 30 minutes
+        
+        periods_config = self.request.periods
+        
+        # Check for fixed period on this specific day
+        if periods_config.constrains and periods_config.constrains.daysFixedPeriods:
+            for fixed_period in periods_config.constrains.daysFixedPeriods:
+                if fixed_period.day.lower() == day:
+                    return fixed_period.period
+        
+        # Use default period if daily is true
+        use_daily = self._parse_bool(periods_config.daily)
+        if use_daily:
+            return periods_config.period
+        
+        # Fallback to default
+        return 30
     
     def _validate_input(self) -> List[str]:
         """Validate input data and return list of errors."""
@@ -187,6 +216,119 @@ class ORToolsScheduler:
         for course in self.request.teacher_courses:
             if course.course_type.lower() not in valid_course_types:
                 errors.append(f"Course {course.course_title} has invalid type: {course.course_type}")
+        
+        # Validate break period
+        errors.extend(self._validate_break_period())
+        
+        # Validate periods configuration
+        if self.request.periods:
+            errors.extend(self._validate_periods())
+        
+        # Validate teacher busy periods
+        errors.extend(self._validate_teacher_busy_periods())
+        
+        # Validate teacher preferred periods
+        errors.extend(self._validate_teacher_preferred_periods())
+        
+        return errors
+    
+    def _validate_break_period(self) -> List[str]:
+        """Validate break period configuration."""
+        errors = []
+        break_config = self.request.break_period
+        
+        # Validate time format and order
+        try:
+            start_time = self._parse_time(break_config.start_time)
+            end_time = self._parse_time(break_config.end_time)
+            
+            if start_time >= end_time:
+                errors.append(f"Break period start time ({break_config.start_time}) must be before end time ({break_config.end_time})")
+        except ValueError:
+            errors.append(f"Invalid break period time format. Use HH:MM format (e.g., '12:00')")
+        
+        # Validate days_exception
+        if break_config.constrains:
+            valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+            for day in break_config.constrains.daysException:
+                if day.lower() not in valid_days:
+                    errors.append(f"Invalid day '{day}' in days_exception. Use valid weekdays: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, or Sunday")
+            
+            # Validate days_fixed_breaks
+            for fixed_break in break_config.constrains.daysFixedBreaks:
+                if fixed_break.day.lower() not in valid_days:
+                    errors.append(f"Invalid day '{fixed_break.day}' in days_fixed_breaks. Use valid weekdays")
+                
+                try:
+                    fb_start = self._parse_time(fixed_break.start_time)
+                    fb_end = self._parse_time(fixed_break.end_time)
+                    if fb_start >= fb_end:
+                        errors.append(f"Fixed break for {fixed_break.day}: start time ({fixed_break.start_time}) must be before end time ({fixed_break.end_time})")
+                except ValueError:
+                    errors.append(f"Invalid time format in fixed break for {fixed_break.day}. Use HH:MM format")
+        
+        return errors
+    
+    def _validate_periods(self) -> List[str]:
+        """Validate periods configuration."""
+        errors = []
+        periods_config = self.request.periods
+        
+        if periods_config.period <= 0:
+            errors.append("Period duration must be greater than 0 minutes")
+        
+        if periods_config.constrains:
+            valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+            
+            # Validate days_exception
+            for day in periods_config.constrains.daysException:
+                if day.lower() not in valid_days:
+                    errors.append(f"Invalid day '{day}' in periods days_exception")
+            
+            # Validate days_fixed_periods
+            for fixed_period in periods_config.constrains.daysFixedPeriods:
+                if fixed_period.day.lower() not in valid_days:
+                    errors.append(f"Invalid day '{fixed_period.day}' in days_fixed_periods")
+                if fixed_period.period <= 0:
+                    errors.append(f"Period duration for {fixed_period.day} must be greater than 0 minutes")
+        
+        return errors
+    
+    def _validate_teacher_busy_periods(self) -> List[str]:
+        """Validate teacher busy periods."""
+        errors = []
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+        
+        for busy_period in self.request.teacher_busy_period:
+            if busy_period.day.lower() not in valid_days:
+                errors.append(f"Invalid day '{busy_period.day}' in teacher busy period for {busy_period.teacher_name}")
+            
+            try:
+                start_time = self._parse_time(busy_period.start_time)
+                end_time = self._parse_time(busy_period.end_time)
+                if start_time >= end_time:
+                    errors.append(f"Teacher {busy_period.teacher_name} busy period: start time must be before end time")
+            except ValueError:
+                errors.append(f"Invalid time format in busy period for {busy_period.teacher_name}")
+        
+        return errors
+    
+    def _validate_teacher_preferred_periods(self) -> List[str]:
+        """Validate teacher preferred teaching periods."""
+        errors = []
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+        
+        for pref_period in self.request.teacher_prefered_teaching_period:
+            if pref_period.day.lower() not in valid_days:
+                errors.append(f"Invalid day '{pref_period.day}' in preferred teaching period for {pref_period.teacher_name}")
+            
+            try:
+                start_time = self._parse_time(pref_period.start_time)
+                end_time = self._parse_time(pref_period.end_time)
+                if start_time >= end_time:
+                    errors.append(f"Teacher {pref_period.teacher_name} preferred period: start time must be before end time")
+            except ValueError:
+                errors.append(f"Invalid time format in preferred period for {pref_period.teacher_name}")
         
         return errors
     
@@ -367,9 +509,16 @@ class ORToolsScheduler:
             for slot_idx in sorted(scheduled_slots.keys()):
                 day_slots.extend(scheduled_slots[slot_idx])
             
+            # Count non-break slots (actual classes)
+            non_break_slots_count = len(day_slots)
+            
             # Add break slots
             break_slots = self._get_break_slots(day)
             day_slots.extend(break_slots)
+            
+            # Exclude days that have only break slots (no actual classes)
+            if non_break_slots_count == 0:
+                continue  # Skip this day - no classes scheduled
             
             # Sort all slots by start time
             day_slots.sort(key=lambda s: s.start_time)
@@ -434,37 +583,144 @@ class ORToolsScheduler:
     
     def _is_slot_feasible(self, course, day: str, slot: int, hall) -> bool:
         """Check if a slot is feasible for teacher and hall."""
-        # TODO: Implement feasibility checks:
-        # - Teacher busy periods
-        # - Hall busy periods
-        # - Break periods
+        # Get slot time range
+        if day not in self.slot_times or slot not in self.slot_times[day]:
+            return False
+        
+        slot_start_str, slot_end_str = self.slot_times[day][slot]
+        slot_start = self._parse_time(slot_start_str)
+        slot_end = self._parse_time(slot_end_str)
+        
+        # 1. Check teacher busy periods
+        for busy_period in self.request.teacher_busy_period:
+            if busy_period.teacher_id == course.teacher_id:
+                if busy_period.day.lower() == day:
+                    busy_start = self._parse_time(busy_period.start_time)
+                    busy_end = self._parse_time(busy_period.end_time)
+                    # Check if slot overlaps with busy period
+                    if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
+                        return False
+        
+        # 2. Check hall busy periods
+        for busy_period in self.request.hall_busy_periods:
+            if busy_period.hall_id == hall.hall_id:
+                # Note: hall_busy_periods don't have day field in schema, 
+                # but we check if time overlaps (assuming same day)
+                busy_start = self._parse_time(busy_period.start_time)
+                busy_end = self._parse_time(busy_period.end_time)
+                if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
+                    return False
+        
+        # 3. Check break periods
+        if self._is_slot_in_break_period(day, slot_start, slot_end):
+            return False
+        
+        # 4. Check teacher preferred times (if in preference mode)
+        if self.respect_preferences:
+            if not self._is_slot_in_teacher_preference(course, day, slot_start, slot_end):
+                return False
+        
+        return True
+    
+    def _times_overlap(self, start1: time, end1: time, start2: time, end2: time) -> bool:
+        """Check if two time ranges overlap."""
+        # Handle case where time wraps around midnight (end < start)
+        if end1 < start1:
+            end1 = self._add_minutes(end1, 24 * 60)  # Add 24 hours
+        if end2 < start2:
+            end2 = self._add_minutes(end2, 24 * 60)
+        
+        # Check overlap: start1 < end2 and start2 < end1
+        return start1 < end2 and start2 < end1
+    
+    def _is_slot_in_break_period(self, day: str, slot_start: time, slot_end: time) -> bool:
+        """Check if a slot overlaps with break period for the given day."""
+        break_config = self.request.break_period
+        
+        # Check if day is in exceptions - no break on exception days
+        if break_config.constrains:
+            if day in [d.lower() for d in break_config.constrains.daysException]:
+                return False  # No break on exception days, so slot is not in break
+        
+        # Check for fixed break on this day
+        if break_config.constrains and break_config.constrains.daysFixedBreaks:
+            for fixed_break in break_config.constrains.daysFixedBreaks:
+                if fixed_break.day.lower() == day:
+                    break_start = self._parse_time(fixed_break.start_time)
+                    break_end = self._parse_time(fixed_break.end_time)
+                    if self._times_overlap(slot_start, slot_end, break_start, break_end):
+                        return True
+                    return False  # Fixed break exists but doesn't overlap
+        
+        # Use default break if daily is true
+        use_daily = self._parse_bool(break_config.daily)
+        if use_daily:
+            break_start = self._parse_time(break_config.start_time)
+            break_end = self._parse_time(break_config.end_time)
+            if self._times_overlap(slot_start, slot_end, break_start, break_end):
+                return True
+        
+        return False
+    
+    def _is_slot_in_teacher_preference(self, course, day: str, slot_start: time, slot_end: time) -> bool:
+        """Check if slot is within teacher's preferred teaching period (strict enforcement)."""
+        # If no preferences specified, allow all slots
+        if not self.request.teacher_prefered_teaching_period:
+            return True
+        
+        # Check if teacher has any preferences
+        teacher_prefs = [
+            pref for pref in self.request.teacher_prefered_teaching_period
+            if pref.teacher_id == course.teacher_id and pref.day.lower() == day
+        ]
+        
+        # If teacher has preferences for this day, slot MUST be within one of them
+        if teacher_prefs:
+            for pref in teacher_prefs:
+                pref_start = self._parse_time(pref.start_time)
+                pref_end = self._parse_time(pref.end_time)
+                # Slot must be completely within preferred period
+                if slot_start >= pref_start and slot_end <= pref_end:
+                    return True
+            # Slot is not in any preferred period
+            return False
+        
+        # No preferences for this day, allow the slot
         return True
     
     def _get_break_slots(self, day: str) -> List[ScheduleSlot]:
-        """Get break time slots for a day."""
+        """
+        Get break time slots for a day.
+        
+        Logic:
+        1. If day is in days_exception, return empty (no break)
+        2. If day has a fixed break in days_fixed_breaks, use that
+        3. If daily is true and no fixed break, use default break times
+        4. Otherwise, no break
+        """
         break_slots = []
         break_config = self.request.break_period
         
-        # Check if day has a break
-        use_daily = self._parse_bool(break_config.daily)
-        
+        # Step 1: Check if day is in exceptions - skip break entirely
         if break_config.constrains:
-            # Check if day is in exceptions
             if day in [d.lower() for d in break_config.constrains.daysException]:
-                return []
-            
-            # Check for custom break on this day
+                return []  # No break on exception days
+        
+        # Step 2: Check for fixed break on this specific day
+        if break_config.constrains and break_config.constrains.daysFixedBreaks:
             for fixed_break in break_config.constrains.daysFixedBreaks:
                 if fixed_break.day.lower() == day:
+                    # Use the fixed break time for this day
                     break_slots.append(ScheduleSlot(
                         day=day.capitalize(),
                         start_time=fixed_break.start_time,
                         end_time=fixed_break.end_time,
                         break_=True
                     ))
-                    return break_slots
+                    return break_slots  # Fixed break overrides default
         
-        # Use default break
+        # Step 3: Use default break if daily is true
+        use_daily = self._parse_bool(break_config.daily)
         if use_daily:
             break_slots.append(ScheduleSlot(
                 day=day.capitalize(),
@@ -477,10 +733,25 @@ class ORToolsScheduler:
     
     def _create_infeasible_response(self, errors: List[str]) -> SchedulingResponse:
         """Create response for infeasible problem."""
-        error_messages = [
-            ErrorMessage(title="Infeasible Schedule", message=err)
-            for err in errors
-        ]
+        error_messages = []
+        
+        for err in errors:
+            # Create detailed error message
+            error_msg = ErrorMessage(
+                constraint_type="HARD",
+                severity="ERROR",
+                code="INFEASIBLE_SCHEDULE",
+                title="Infeasible Schedule",
+                description=err,
+                root_causes=[
+                    RootCause(
+                        cause="Constraint conflict",
+                        details="The provided constraints cannot be satisfied simultaneously."
+                    )
+                ],
+                resolution_hint="Try relaxing constraints, adding more halls or time slots, or reducing course hours."
+            )
+            error_messages.append(error_msg)
         
         return SchedulingResponse(
             timetable=[],
@@ -494,7 +765,20 @@ class ORToolsScheduler:
         return SchedulingResponse(
             timetable=[],
             messages=Messages(error_message=[
-                ErrorMessage(title="Solver Error", message=error)
+                ErrorMessage(
+                    constraint_type="HARD",
+                    severity="ERROR",
+                    code="SOLVER_ERROR",
+                    title="Solver Error",
+                    description=error,
+                    root_causes=[
+                        RootCause(
+                            cause="Unexpected solver failure",
+                            details=error
+                        )
+                    ],
+                    resolution_hint="Please check your input data and try again. If the problem persists, contact support."
+                )
             ]),
             status="ERROR",
             solve_time_seconds=0.0

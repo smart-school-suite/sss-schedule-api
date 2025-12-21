@@ -108,6 +108,29 @@ class OperationalPeriod(BaseModel):
 
 
 # ===========================
+# Period Duration Configuration
+# ===========================
+
+class DayFixedPeriod(BaseModel):
+    """Custom period duration for specific day"""
+    day: str
+    period: int  # Duration in minutes
+
+
+class PeriodConstraints(BaseModel):
+    """Period duration exceptions and overrides"""
+    daysException: List[str] = []  # Days to skip default period
+    daysFixedPeriods: List[DayFixedPeriod] = []  # Custom periods per day
+
+
+class Periods(BaseModel):
+    """Configurable slot duration configuration"""
+    daily: Union[bool, str] = True  # If true, apply uniform period to all days
+    period: int = 30  # Default duration in minutes
+    constrains: Optional[PeriodConstraints] = None
+
+
+# ===========================
 # Soft Constraints Configuration
 # ===========================
 
@@ -186,6 +209,7 @@ class SchedulingRequest(BaseModel):
     hall_busy_periods: List[HallBusyPeriod] = []
     break_period: BreakPeriod
     operational_period: OperationalPeriod
+    periods: Optional[Periods] = None  # Optional slot duration configuration
     soft_constrains: SoftConstraints = SoftConstraints()
 
 
@@ -217,10 +241,36 @@ class DaySchedule(BaseModel):
     slots: List[ScheduleSlot]
 
 
+class AffectedEntity(BaseModel):
+    """Entity affected by an error or constraint violation"""
+    entity_type: str  # "TEACHER", "COURSE", "HALL", "TIME_SLOT", etc.
+    teacher_id: Optional[str] = None
+    teacher_name: Optional[str] = None
+    course_id: Optional[str] = None
+    course_name: Optional[str] = None
+    hall_id: Optional[str] = None
+    hall_name: Optional[str] = None
+    day: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+
+
+class RootCause(BaseModel):
+    """Root cause of an error or constraint violation"""
+    cause: str
+    details: Optional[str] = None
+
+
 class ErrorMessage(BaseModel):
-    """Error or warning message"""
+    """Error or warning message with detailed diagnostics"""
+    constraint_type: str = "HARD"  # "HARD" or "SOFT"
+    severity: str = "ERROR"  # "ERROR" or "WARNING"
+    code: str  # Stable unique error code (e.g., "TEACHER_BUSY_PERIOD_CONFLICT")
     title: str
-    message: str
+    description: str  # Detailed description (was "message")
+    affected_entities: List[AffectedEntity] = []
+    root_causes: List[RootCause] = []
+    resolution_hint: Optional[str] = None
 
 
 class Messages(BaseModel):
