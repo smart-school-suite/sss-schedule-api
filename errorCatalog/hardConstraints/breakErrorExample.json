@@ -1,0 +1,72 @@
+{
+  "constraint_failed": {
+    "type": "FIXED_BREAK_SLOT",
+    "details": {
+      "start_time": "12:00",
+      "end_time": "12:30",
+      "daily": true
+    }
+  },
+  "blockers": [
+    {
+      "type": "NON_OPERATIONAL_DAYS",
+      "description": "The break is set to 'daily', but the institution is closed on these days.",
+      "invalid_dates": [
+        {
+          "day": "Sunday",
+          "requested_break" : [
+             {
+                "start_time": "12:00",
+                "end_time": "12:30" 
+             }
+          ],
+          "operational_status": "CLOSED"
+        },
+        {
+          "day": "Saturday",
+          "requested_break": "12:00 - 12:30",
+          "actual_status": "CLOSED"
+        }
+      ]
+    },
+    {
+      "type": "OPERATIONAL_WINDOW_CLASH",
+      "description": "The institution is open, but the operating hours do not encompass the break time.",
+      "clashing_periods": [
+        {
+          "day": "Monday",
+          "requested_break": "12:00 - 12:30",
+          "operating_window": "12:30 - 17:30",
+          "gap": "30 minutes before opening"
+        },
+        {
+          "day": "Wednesday",
+          "requested_break": "12:00 - 12:30",
+          "operating_window": "08:00 - 11:30",
+          "gap": "30 minutes after closing"
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "MODIFY_OPERATIONAL_CALENDAR",
+      "description": "Extend school hours to include the 12:00 - 12:30 window for the affected days.",
+      "suggested_changes": [
+        {
+          "day": "Monday",
+          "new_start_time": "12:00",
+          "new_end_time": "17:30"
+        }
+      ]
+    },
+    {
+      "action": "RELAX_BREAK_CONSTRAINT",
+      "description": "Disable the 'daily' flag and only apply the break to valid operational days (Monday-Friday).",
+      "updated_settings": {
+        "daily": false,
+        "active_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "constraint_failed": {
+    "type": "PERIOD_DURATION_CONSTRAINT",
+    "details": {
+      "required_duration_minutes": 45,
+      "is_daily_requirement": true,
+      "reason": "The operational window on specific days is shorter than the required period duration."
+    }
+  },
+  "blockers": [
+    {
+      "type": "INSUFFICIENT_TIME_WINDOW",
+      "description": "The institution's open hours are too narrow to accommodate a 45-minute block.",
+      "affected_days": [
+        {
+          "day": "Monday",
+          "operational_start": "12:30",
+          "operational_end": "12:45",
+          "available_total_minutes": 15,
+          "deficit_minutes": 30
+        },
+        {
+          "day": "Friday",
+          "operational_start": "09:00",
+          "operational_end": "09:30",
+          "available_total_minutes": 30,
+          "deficit_minutes": 15
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "EXPAND_OPERATIONAL_WINDOW",
+      "description": "Increase the operational hours for the affected days to meet the minimum 45-minute threshold.",
+      "proposed_adjustments": [
+        {
+          "day": "Monday",
+          "suggested_start": "12:00",
+          "suggested_end": "12:45",
+          "new_total_minutes": 45
+        }
+      ]
+    },
+    {
+      "action": "REDUCE_PERIOD_DURATION",
+      "description": "Lower the required period length to fit the smallest available operational window.",
+      "suggested_duration": 15
+    }
+  ]
+}

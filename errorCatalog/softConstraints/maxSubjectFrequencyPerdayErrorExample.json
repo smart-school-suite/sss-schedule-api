@@ -1,0 +1,68 @@
+{
+  "constraint_failed": {
+    "type": "MAX_SUBJECT_FREQUENCY_PER_DAY",
+    "details": {
+      "subject_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+      "subject_name": "Calculus I",
+      "max_allowed_per_day": 1,
+      "daily_requirement": true
+    }
+  },
+  "blockers": [
+    {
+      "type": "SUBJECT_CROWDING_ANALYSIS",
+      "description": "Calculus I is scheduled twice on Monday because other days are unavailable.",
+      "violation_details": {
+        "day": "Monday",
+        "current_frequency": 2,
+        "max_allowed": 1,
+        "conflict_slots": [
+          {
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c"
+          },
+          {
+            "start_time": "14:00",
+            "end_time": "15:00",
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c"
+          }
+        ]
+      }
+    },
+    {
+      "type": "RESOURCE_DISTRIBUTION_FAILURE",
+      "description": "Why the scheduler couldn't spread these slots to other days.",
+      "unavailability_summary": [
+        {
+          "day": "Tuesday",
+          "reason": "TEACHER_UNAVAILABLE",
+          "details": "Dr. John Doe has no available time windows on this day."
+        },
+        {
+          "day": "Wednesday",
+          "reason": "HALL_AT_CAPACITY",
+          "details": "All suitable lecture halls are booked for Science Lab sessions."
+        },
+        {
+          "day": "Thursday",
+          "reason": "TEACHER_UNAVAILABLE",
+          "details": "Dr. John Doe has a 'Day Off' constraint."
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "RELAX_FREQUENCY_CONSTRAINT",
+      "description": "Allow 'Calculus I' to be taught twice on Mondays to accommodate teacher availability.",
+      "parameter_to_change": "max_frequency",
+      "new_value": 2
+    },
+    {
+      "action": "DISTRIBUTE_TO_OTHER_STAFF",
+      "description": "Assign the 14:00 Monday slot to a different instructor who is available on Tuesday or Friday.",
+      "potential_candidate_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    }
+  ]
+}

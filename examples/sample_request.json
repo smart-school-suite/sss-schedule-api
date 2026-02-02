@@ -63,16 +63,22 @@
     ],
     "halls": [
         {
-            "hall_name": "Hall 2",
-            "hall_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
-            "hall_capacity": 500,
-            "hall_type": "lab"
+            "hall_name": "Main Lecture Theatre A",
+            "hall_id": "c1d2e3f4-a5b6-7c8d-9e0f-1a2b3c4d5e6f",
+            "hall_capacity": 300,
+            "hall_type": "Lecture"
         },
         {
-            "hall_name": "Hall 2",
-            "hall_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
-            "hall_capacity": 500,
-            "hall_type": "lecture"
+            "hall_name": "Medium Lecture Hall B",
+            "hall_id": "f5e4d3c2-b1a0-9876-5432-1fedcba98765",
+            "hall_capacity": 150,
+            "hall_type": "Lecture"
+        },
+        {
+            "hall_name": "Small Lecture Room C",
+            "hall_id": "99z8y7x6-w5v4-u3t2-s1r0-q9p8o7n6m5l4",
+            "hall_capacity": 50,
+            "hall_type": "Lecture"
         }
     ],
     "hall_busy_periods": [
@@ -88,11 +94,11 @@
         "end_time": "12:45",
         "daily": "boolean",
         "constrains": {
-            "daysException": [
+            "days_exception": [
                 "monday",
                 "tuesday"
             ],
-            "daysFixedBreaks": [
+            "days_fixed_breaks": [
                 {
                     "day": "monday",
                     "start_time": "11:30",
@@ -142,7 +148,6 @@
         },
         "course_credit_hour_density_control": "boolean",
         "course_spread_across_week": "boolean",
-        "hall_capacity_limit": "boolean",
         "hall_type_suitability": {
             "theory": "lecture",
             "practical": "lab"

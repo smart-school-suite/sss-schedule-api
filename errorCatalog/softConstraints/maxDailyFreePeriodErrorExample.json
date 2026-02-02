@@ -1,0 +1,62 @@
+{
+  "constraint_failed": {
+    "type": "MAX_FREE_PERIODS_PER_DAY",
+    "details": {
+      "target_free_periods": 1,
+      "daily": true,
+      "reason": "The minimum requirement of 1 free period could not be met for the specified day."
+    }
+  },
+  "blockers": [
+    {
+      "type": "SCHEDULE_DENSITY_SATURATION",
+      "description": "The day is fully occupied by mandatory sessions, leaving no room for a free period.",
+      "day": "Tuesday",
+      "occupied_slots": [
+        {
+          "start_time": "09:00",
+          "end_time": "10:00",
+          "course_id": "4a3b9e1f-6c5d-7b2e-9c1a-8d4f4e3a2b1c",
+          "course_name": "Advanced Mathematics"
+        },
+        {
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "course_id": "9e1f6c5d-4a3b-8d4f-7b2e-2f8a0b3c4d5e",
+          "course_name": "Physics Laboratory"
+        },
+        {
+          "start_time": "11:00",
+          "end_time": "12:00",
+          "course_id": "bcde-f1e2d3c4-a1b2c3d4-e5f6-b5a6",
+          "course_name": "English Literature"
+        }
+      ],
+      "total_occupied_minutes": 180
+    },
+    {
+      "type": "OPERATIONAL_LIMIT_RESTRICTION",
+      "description": "The operational window on Tuesday is too short to allow an extra 60-minute gap.",
+      "day_stats": {
+        "day": "Tuesday",
+        "school_open": "09:00",
+        "school_close": "12:00",
+        "total_operational_minutes": 180,
+        "required_time_for_free_period": 60,
+        "available_buffer": 0
+      }
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "EXTEND_OPERATIONAL_HOURS",
+      "description": "Shift closing time on Tuesday to 13:00 to create a 60-minute gap for a free period.",
+      "suggested_close_time": "13:00"
+    },
+    {
+      "action": "REDUCE_SESSION_COUNT",
+      "description": "Move one of the Tuesday morning sessions to Wednesday to free up a slot.",
+      "recommended_move_course_id": "bcde-f1e2d3c4-a1b2c3d4-e5f6-b5a6"
+    }
+  ]
+}

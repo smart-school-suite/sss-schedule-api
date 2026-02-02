@@ -1,0 +1,84 @@
+{
+    "constraint_failed": {
+        "type": "HALL_TIME_WINDOWS",
+        "details": {
+            "hall_id": "550e8400-e29b-41d4-a716-446655440000",
+            "hall_name": "Hall A",
+            "windows": [
+                {
+                    "day": "Monday",
+                    "start_time": "09:00",
+                    "end_time": "11:00"
+                }
+            ]
+        }
+    },
+    "blockers": [
+        {
+            "type": "INSTRUCTOR_UNAVAILABLE",
+            "instructor_details": [
+                {
+                    "instructor_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                    "instructor_name": "Dr. John Doe",
+                    "busy_slots": [
+                        {
+                            "start_time": "10:00",
+                            "end_time": "12:00",
+                            "day": "Monday"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "TEACHER_BUSY",
+            "teacher_busy_details": [
+                {
+                    "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                    "teacher_name": "Dr. John Doe",
+                    "busy_slots": [
+                        {
+                            "start_time": "10:00",
+                            "end_time": "12:00",
+                            "day": "Monday"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "TEACHER_UNAVAILABLE",
+            "teacher_time_preferences": [
+                {
+                    "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                    "teacher_name": "Dr. John Doe",
+                    "avaliable_slots": [
+                        {
+                            "start_time": "09:00",
+                            "end_time": "11:00",
+                            "day": "Monday"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "suggestions": [
+        {
+            "hall_id": "550e8400-e29b-41d4-a716-446655440000",
+            "hall_name": "Hall A",
+            "suggested_time_slots": [
+                {
+                    "day": "Monday",
+                    "start_time": "11:00",
+                    "end_time": "13:00"
+                },
+                {
+                    "day": "Tuesday",
+                    "start_time": "09:00",
+                    "end_time": "11:00"
+                }
+            ]
+        }
+    ]
+}

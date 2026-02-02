@@ -1,0 +1,84 @@
+{
+  "constraint_failed": {
+    "type": "TEACHER_TIME_WINDOW",
+    "details": {
+      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "teacher_name": "Dr. John Doe",
+      "windows": [
+        {
+          "day": "Monday",
+          "start_time": "09:00",
+          "end_time": "11:00"
+        }
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "type": "TEACHER_UNAVAILABLE",
+      "teacher_details": [
+        {
+          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+          "teacher_name": "Dr. John Doe",
+          "busy_slots": [
+            {
+              "start_time": "10:00",
+              "end_time": "12:00",
+              "day": "Monday"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "TEACHER_BUSY",
+      "teacher_busy_details": [
+        {
+          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+          "teacher_name": "Dr. John Doe",
+          "busy_slots": [
+            {
+              "start_time": "10:00",
+              "end_time": "12:00",
+              "day": "Monday"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "TEACHER_UNAVAILABLE",
+      "teacher_time_preferences": [
+        {
+          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+          "teacher_name": "Dr. John Doe",
+          "avaliable_slots": [
+            {
+              "start_time": "08:00",
+              "end_time": "10:00",
+              "day": "Monday"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "teacher_name": "Dr. John Doe",
+      "suggested_time_slots": [
+        {
+          "day": "Monday",
+          "start_time": "08:00",
+          "end_time": "10:00"
+        },
+        {
+          "day": "Tuesday",
+          "start_time": "09:00",
+          "end_time": "11:00"
+        }
+      ]
+    }
+  ]
+}

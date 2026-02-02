@@ -1,0 +1,63 @@
+{
+  "constraint_failed": {
+    "type": "MAX_PERIODS_PER_DAY",
+    "details": {
+      "max_allowed_periods": 8,
+      "current_assigned_periods": 9,
+      "day": "Wednesday",
+      "daily": true
+    }
+  },
+  "blockers": [
+    {
+      "type": "PERIOD_OVERFLOW_ANALYSIS",
+      "description": "Wednesday exceeds the 8-period limit due to the following assigned sessions.",
+      "assigned_slots": [
+        { "start_time": "09:00", "end_time": "10:00", "course_id": "8f2d9b1a-..." },
+        { "start_time": "10:00", "end_time": "11:00", "course_id": "7b2e9c1a-..." },
+        { "start_time": "11:00", "end_time": "12:00", "course_id": "4a3b9e1f-..." },
+        { "start_time": "12:00", "end_time": "13:00", "course_id": "9e1f6c5d-..." },
+        { "start_time": "13:00", "end_time": "14:00", "course_id": "f47ac10b-..." },
+        { "start_time": "14:00", "end_time": "15:00", "course_id": "a1b2c3d4-..." },
+        { "start_time": "15:00", "end_time": "16:00", "course_id": "e9876543-..." },
+        { "start_time": "16:00", "end_time": "17:00", "course_id": "b5c6d7e8-..." },
+        { "start_time": "17:00", "end_time": "18:00", "course_id": "d3b07384-..." }
+      ]
+    },
+    {
+      "type": "DISTRIBUTION_RESTRICTION",
+      "description": "The 9th period could not be moved to other days due to scheduling conflicts.",
+      "attempted_redistribution": [
+        {
+          "day": "Monday",
+          "reason": "OPERATIONAL_LIMIT",
+          "details": "School closes early at 15:00 on Mondays."
+        },
+        {
+          "day": "Tuesday",
+          "reason": "RESOURCE_COLLISION",
+          "details": "All suitable classrooms for this class are occupied."
+        },
+        {
+          "day": "Friday",
+          "reason": "TEACHER_UNAVAILABLE",
+          "details": "Subject teacher is only part-time and does not work Fridays."
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "INCREASE_DAILY_LIMIT",
+      "description": "Adjust the maximum periods per day to 9 for this specific group/teacher.",
+      "parameter_to_change": "max_periods",
+      "new_value": 9
+    },
+    {
+      "action": "EXTEND_OTHER_OPERATIONAL_DAYS",
+      "description": "Extend Monday's operating hours to allow the 9th session to be moved there.",
+      "target_day": "Monday",
+      "required_extension": "60 minutes"
+    }
+  ]
+}
