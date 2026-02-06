@@ -1,0 +1,201 @@
+{
+  "constraint_failed": {
+    "type": "max_course_frequency_per_day",
+    "rule": {
+      "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+      "course_name": "Calculus I",
+      "max_allowed_per_day": 1
+    }
+  },
+  "total_blockers": 2,
+  "blockers": [
+    {
+      "type": "max_course_frequency_per_day",
+      "entity": {
+        "type": "course",
+        "id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+        "name": "Calculus I"
+      },
+      "conflict": {
+        "day": "Monday",
+        "current_frequency": 2,
+        "max_allowed": 1
+      },
+      "evidence": {
+        "conflict_slots": [
+          {
+            "day": "Monday",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c"
+          },
+          {
+            "day": "Monday",
+            "start_time": "14:00",
+            "end_time": "15:00",
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c"
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "DISTRIBUTION_IMPOSSIBLE",
+      "entity": {
+        "type": "course",
+        "id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+        "name": "Calculus I"
+      },
+      "conflict": {
+        "message": "No remaining viable day after checking constraints",
+        "attempted_days": ["Tuesday", "Wednesday", "Thursday"],
+        "viable_days_found": 0
+      },
+      "evidence": {
+        "blocking_reasons_per_day": [
+          {
+             "type":"HALL_UNAVAILABLE",
+             "entity": {
+                "hall_id":"f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "hall_name":"Hall B"
+             },
+             "conflict":{
+                 "attempted_slots":[
+                   {
+                      "day":"Tuesday",
+                      "start_time":"09:00",
+                      "end_time":"11:00"
+                   }
+                 ]
+             },
+             "evidence":{
+                 "busy_slots":[
+                   {
+                      "day":"Tuesday",
+                      "start_time":"09:00",
+                      "end_time":"11:00"
+                   }
+                 ]
+             }
+          },
+          {
+            "type":"TEACHER_UNAVAILABLE",
+            "entity": {
+              "teacher_id":"f47ac10b-58cc-4372-a567-0e02b2c3d479",
+              "teacher_name":"Dr. John Doe"
+            },
+            "conflict":{
+                "attempted_slots":[
+                  {
+                     "day":"Wednesday",
+                     "start_time":"13:00",
+                     "end_time":"15:00"
+                  }
+                ]
+            },
+            "evidence":{
+                "available_slots":[
+                  {
+                     "day":"Wednesday",
+                     "start_time":"13:00",
+                     "end_time":"15:00"
+                  }
+                ]
+            }
+          },
+          {
+             "type":"TEACHER_BUSY",
+              "entity": {
+                "teacher_id":"f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "teacher_name":"Dr. John Doe"
+              },
+              "conflict": {
+                "attempted_slots": [
+                  {
+                    "day": "Wednesday",
+                    "start_time": "13:00",
+                    "end_time": "15:00"
+                  }
+                ]
+              },
+              "evidence": {
+                "busy_slots": [
+                  {
+                    "day": "Wednesday",
+                    "start_time": "13:00",
+                    "end_time": "15:00"
+                  }
+                ]
+              }
+          },
+          {
+            "type":"TEACHER_MAX_DAILY_HOURS_EXCEEDED",
+            "entity": {
+              "teacher_id":"f47ac10b-58cc-4372-a567-0e02b2c3d479",
+              "teacher_name":"Dr. John Doe"
+            },
+            "conflict":{
+                "day":"Thursday",
+                "max_allowed_hours":4,
+                "current_booked_hours":5
+            },
+            "evidence":{
+                "booked_slots":[
+                  {
+                     "day":"Thursday",
+                     "start_time":"09:00",
+                     "end_time":"14:00"
+                  }
+                ]
+            }
+          },
+          {
+            "type":"OPERATIONAL_PERIOD_EXCEEDED",
+            "entity": {
+              "day":"Thursday",
+              "opening_time":"07:00",
+              "closing_time":"18:00"
+            },
+            "conflict":{
+                "attempted_slot":{
+                   "start_time":"17:00",
+                   "end_time":"19:00"
+                }
+            },
+            "evidence":{
+                "operational_hours":{
+                   "opening_time":"07:00",
+                   "closing_time":"18:00"
+                }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "RELAX_CONSTRAINT",
+      "target": "max_course_frequency_per_day",
+      "parameter": "max_allowed_per_day",
+      "proposed_value": 2
+    },
+    {
+      "action": "CHANGE_RESOURCE",
+      "target": "teacher",
+      "description": "Re-assign or find substitute teacher for one of the conflicting slots",
+      "affected_slot": {
+        "day": "Monday",
+        "start_time": "14:00",
+        "end_time": "15:00"
+      },
+      "candidate_entity_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    },
+    {
+      "action": "RELAX_RESOURCE_CONSTRAINT",
+      "target": "hall_capacity",
+      "description": "Increase capacity or allow overflow for SCIENCE_LABS on Wednesday",
+      "impact": "MEDIUM"
+    }
+  ]
+}

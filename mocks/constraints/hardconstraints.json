@@ -1,0 +1,69 @@
+{
+     "hard_constraints":[
+         {
+            "name":"break_period",
+            "description":"Specifies launch/break periods during which no classes can be scheduled.",
+            "examples":{
+                 "case_one":{
+                     "start_time":"12:00",
+                     "end_time":"13:00"
+                 },
+                 "case_two":{
+                     "start_time":"15:00",
+                     "end_time":"15:30",
+                     "day_exceptions":[
+                         {
+                             "day":"Friday",
+                             "start_time":"14:00",
+                             "end_time":"15:00"
+                         }
+                     ]
+                 },
+                 "case_three":{
+                    "start_time":"12:00",
+                    "end_time":"13:00",
+                    "no_break_exceptions":["Monday"]
+                 }
+            }
+         },
+         {
+            "name":"operational_period",
+            "description":"Defines the overall operational hours of the institution, outside of which no classes can be scheduled.",
+            "examples":{
+                "case_one":{
+                     "start_time":"07:00",
+                     "end_time":"18:00"
+                },
+                "case_two":{
+                     "start_time":"08:00",
+                     "end_time":"17:00",
+                     "day_exceptions":[
+                         {
+                             "day":"Wednesday",
+                             "start_time":"09:00",
+                             "end_time":"16:00"
+                         }
+                     ]
+                 }
+            }
+         },
+         {
+            "name":"periods",
+            "description":"Specifies the period duration in minutes, for each slots",
+            "examples":{
+                "case_one":{
+                     "period_duration_minutes": 60
+                },
+                "case_two":{
+                     "period_duration_minutes": 90,
+                     "day_exceptions":[
+                         {
+                             "day":"Tuesday",
+                             "period_duration_minutes": 120
+                         }
+                     ]
+                 }
+            }
+         }
+     ]
+}

@@ -1,0 +1,24 @@
+{
+  "daignostic_error_keys": [
+    {
+      "key": "DISTRIBUTION_IMPOSSIBLE",
+      "description": "The scheduling distribution is impossible to achieve with the current constraints and resources."
+    },
+    {
+      "key": "MAX_DAILY_HOURS",
+      "description": "A teacher has exceeded their maximum allowed teaching hours for a single day."
+    },
+    {
+      "key": "TEACHER_MAX_DAILY_HOURS_EXCEEDED",
+      "description": "A specific teacher has exceeded their maximum allowed teaching hours for a single day."
+    },
+    {
+      "key": "TEACHER_MAX_WEEKLY_HOURS_EXCEEDED",
+      "description": "A specific teacher has exceeded their maximum allowed teaching hours for the week."
+    },
+    {
+      "key": "STAFFING_INSUFFICIENCY",
+      "description": "There are not enough staff members available to meet the scheduling requirements."
+    }
+  ]
+}

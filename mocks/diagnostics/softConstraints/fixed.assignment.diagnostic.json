@@ -1,0 +1,317 @@
+{
+  "constraint_failed": {
+    "type": "FIXED_COURSE_SLOT",
+    "details": {
+      "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+      "start_time": "10:00",
+      "end_time": "12:00",
+      "day": "Monday"
+    }
+  },
+  "blockers": [
+    {
+      "type": "HALL_BUSY",
+      "entity": {
+        "type": "HALL",
+        "id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+        "name": "Main Lecture Hall"
+      },
+      "conflict": {
+        "day": "Monday",
+        "start_time": "10:00",
+        "end_time": "12:00"
+      },
+      "evidence": {
+        "existing_bookings": [
+          {
+            "course_id": "z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4",
+            "teacher_id": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
+            "day": "Monday",
+            "start_time": "10:00",
+            "end_time": "12:00"
+          }
+        ]
+      }
+    },
+    {
+      "type": "TEACHER_UNAVAILABLE",
+      "entity": {
+        "type": "TEACHER",
+        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Dr. John Doe"
+      },
+      "conflict": {
+        "day": "Monday",
+        "start_time": "10:00",
+        "end_time": "12:00"
+      },
+      "evidence": {
+        "teacher_preferred_slots": [
+          {
+            "day": "Monday",
+            "start_time": "10:00",
+            "end_time": "12:00"
+          }
+        ]
+      }
+    },
+    {
+      "type": "TEACHER_BUSY",
+      "entity": {
+        "type": "TEACHER",
+        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Dr. John Doe"
+      },
+      "conflict": {
+        "day": "Monday",
+        "start_time": "10:00",
+        "end_time": "12:00"
+      },
+      "evidence": {
+        "existing_bookings": [
+          {
+            "course_id": "m1n2b3v4-c5x6-z7a8-s9d0-f1g2h3j4k5l6",
+            "hall_id": "p0o9i8u7-y6t5-r4e3-w2q1-z0x9c8v7b6n5",
+            "day": "Monday",
+            "start_time": "10:00",
+            "end_time": "12:00"
+          }
+        ]
+      }
+    },
+    {
+      "type": "TEACHER_COURSE_MISMATCH",
+      "entity": {
+        "type": "TEACHER_COURSE",
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Dr. John Doe",
+        "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+        "course_name": "Advanced Quantum Mechanics"
+      },
+      "conflict": {
+        "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      },
+      "evidence": {
+        "teacher_courses": [
+          {
+            "course_id": "x1y2z3a4-b5c6-d7e8-f9g0-h1i2j3k4l5m6",
+            "course_name": "Classical Mechanics"
+          }
+        ]
+      }
+    },
+    {
+      "type": "BREAK_PERIOD_VIOLATION",
+      "entity": {
+        "type": "break",
+        "day": "Monday",
+        "start_time": "10:00",
+        "end_time": "12:00"
+      },
+      "conflict": {
+        "day": "Friday",
+        "start_time": "10:00",
+        "end_time": "12:00"
+      },
+      "evidence": {
+        "break_period": {
+          "start_time": "09:00",
+          "end_time": "11:00"
+        }
+      }
+    },
+    {
+      "type": "OPERATIONAL_HOURS_VIOLATION",
+      "entity": {
+        "type": "operational_hours",
+        "day": "Monday",
+        "start_time": "07:00",
+        "end_time": "12:00"
+      },
+      "conflict": {
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "day": "Monday"
+      },
+      "evidence": {
+        "operational_hours": {
+          "start_time": "08:00",
+          "end_time": "17:00"
+        }
+      }
+    },
+    {
+      "type": "PERIOD_DURATION_VIOLATION",
+      "entity": {
+        "type": "period_duration",
+        "day": "Monday",
+        "period_duration_minutes": 60
+      },
+      "conflict": {
+        "day": "Monday",
+        "start_time": "10:00",
+        "end_time": "12:00"
+      },
+      "evidence": {
+        "slot":{
+           "start_time": "10:00",
+           "end_time": "12:00",
+           "period_duration_minutes": 120
+        }
+      }
+   
+    },
+    {   
+       "type":"MAX_COURSE_DAILY_FREQUENCY_EXCEEDED",
+       "entity":{
+          "type":"course_daily_frequency",
+          "max_frequency":2
+       },
+        "conflict":{
+            "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+            "day":"Monday",
+            "current_frequency":3
+        },
+        "evidence":{
+            "course_schedule":[
+                {
+                    "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+                    "day":"Monday",
+                    "start_time":"08:00",
+                    "end_time":"09:30"
+                },
+                {
+                    "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+                    "day":"Monday",
+                    "start_time":"10:00",
+                    "end_time":"11:30"
+                },
+                {
+                    "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+                    "day":"Monday",
+                    "start_time":"13:00",
+                    "end_time":"14:30"
+                }
+            ]
+        }
+    },
+    {
+      "type": "MAX_TEACHER_WEEKLY_HOURS_EXCEEDED",
+      "entity": {
+        "type": "TEACHER",
+        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Dr. John Doe"
+      },
+      "conflict": {
+        "max_allowed_hours": 8,
+        "actual_hours": 10,
+        "excess": 2
+      },
+      "evidence": {
+        "booked_slots": [
+          {
+            "day": "Monday",
+            "start_time": "09:00",
+            "end_time": "12:00",
+            "course_id": "111e222b-333c-444d-555e-666f777a888b",
+            "hours": 3
+          },
+          {
+            "day": "Wednesday",
+            "start_time": "10:00",
+            "end_time": "14:00",
+            "course_id": "222e333b-444c-555d-666e-777f888a999b",
+            "hours": 4
+          },
+          {
+            "day": "Friday",
+            "start_time": "13:00",
+            "end_time": "16:00",
+            "course_id": "333e444b-555c-666d-777e-888f999a000b",
+            "hours": 3
+          }
+        ]
+      }
+    },
+    {
+      "type": "MAX_TEACHER_DAILY_HOURS_EXCEEDED",
+      "entity": {
+        "type": "TEACHER",
+        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Dr. John Doe"
+      },
+      "conflict": {
+        "max_allowed_hours": 4,
+        "current_booked_hours": 5
+      },
+      "evidence": {
+        "booked_slots": [
+          {
+            "day": "Monday",
+            "start_time": "09:00",
+            "end_time": "12:00",
+            "course_id": "111e222b-333c-444d-555e-666f777a888b",
+            "hours": 3
+          },
+          {
+            "day": "Monday",
+            "start_time": "13:00",
+            "end_time": "15:00",
+            "course_id": "999d888c-777b-666a-555e-444f333a2221",
+            "hours": 2
+          }
+        ]
+      }
+   
+    },
+    {
+      "type":"MAX_DAILY_PERIODS_EXCEEDED",
+      "entity":{
+         "type":"daily_periods",
+         "day":"Monday",
+         "max_periods":5
+      },
+      "conflict":{
+         "day":"Monday",
+         "current_periods":6
+      },
+      "evidence":{
+         "daily_schedule":[
+            {
+               "course_id":"111e222b-333c-444d-555e-666f777a888b",
+               "start_time":"08:00",
+               "end_time":"09:30"
+            },
+            {
+               "course_id":"222e333b-444c-555d-666e-777f888a999b",
+               "start_time":"10:00",
+               "end_time":"11:30"
+            },
+            {
+               "course_id":"333e444b-555c-666d-777e-888f999a000b",
+               "start_time":"12:00",
+               "end_time":"13:30"
+            },
+            {
+               "course_id":"444e555b-666c-777d-888e-999f000a1111",
+               "start_time":"14:00",
+               "end_time":"15:30"
+            },
+            {
+               "course_id":"555e666b-777c-888d-999e-000f111a2222",
+               "start_time":"16:00",
+               "end_time":"17:30"
+            },
+            {
+               "course_id":"666f777b-888c-999d-000e-111f222a3333",
+               "start_time":"18:00",
+               "end_time":"19:30"
+            }
+         ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+    "timetable_entities":[
+         {
+            "type":"TEACHER",
+            "teacher_id":"uuid",
+            "teacher_name":"string"
+         },
+         {
+            "type":"OPERATIONAL_PERIOD",
+            "day":"string",
+            "start_time":"HH:MM",
+            "end_time":"HH:MM"
+         },
+         {
+             "type":"COURSE",
+            "course_id":"uuid",
+            "course_name":"string"
+         },
+         {
+            "type":"HALL",
+            "hall_id":"uuid",
+            "hall_name":"string"
+         }
+    ]
+}

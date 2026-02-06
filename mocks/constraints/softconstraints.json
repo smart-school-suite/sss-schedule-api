@@ -1,0 +1,321 @@
+{
+    "soft_constraints": [
+        {
+            "name": "teacher_max_daily_hours",
+            "description": "Limits the maximum consecutive or total teaching hours assigned to any teacher on a single day",
+            "examples": {
+                "case_one": {
+                    "max_hours": 8
+                },
+                "case_two": {
+                    "max_hours": 6,
+                    "teacher_exceptions": [
+                        {
+                            "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                            "max_hours": 10
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "teacher_max_weekly_hours",
+            "description": "Caps the total teaching load (in hours) for each teacher across the entire week",
+            "examples": {
+                "case_one": {
+                    "max_hours": 40
+                },
+                "case_two": {
+                    "max_hours": 30,
+                    "teacher_exceptions": [
+                        {
+                            "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                            "max_hours": 25
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "max_periods_per_day",
+            "description": "Maximum number of class sessions/periods scheduled in any single day",
+            "examples": {
+                "case_one": {
+                    "max_periods": 6
+                },
+                "case_two": {
+                    "max_periods": 5,
+                    "day_exceptions": [
+                        {
+                            "day": "Monday",
+                            "max_periods": 7
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "max_free_periods_per_day",
+            "description": "Maximum number of unscheduled (gap/free) periods allowed per day in the student timetable",
+            "examples": {
+                "case_one": {
+                    "max_free_periods": 2
+                },
+                "case_two": {
+                    "max_free_periods": 1,
+                    "day_exceptions": [
+                        {
+                            "day": "Monday",
+                            "max_free_periods": 3
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "max_course_frequency_per_day",
+            "description": "Limits how many times the same course can appear on any given day",
+            "examples": {
+                "case_one": {
+                    "max_frequency": 2
+                },
+                "case_two": {
+                    "max_frequency": 1,
+                    "course_exceptions": [
+                        {
+                            "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                            "max_frequency": 3
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "course_requested_time_slots",
+            "description": "Represents user-requested preferred days and time slots where the scheduler should attempt to place sessions for a specific course. These requested slots are treated as soft placement preferences and do not override availability rules or other hard constraints. The scheduler will try to schedule the course within the specified slots when feasible; otherwise, it may place the course in alternative valid periods and return diagnostics explaining why the requested slots could not be satisfied.",
+            "examples": {
+                "case_one": [
+                    {
+                        "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "slots": [
+                            {
+                                "day": "Monday",
+                                "start_time": "09:00",
+                                "end_time": "10:30"
+                            },
+                            {
+                                "day": "Wednesday",
+                                "start_time": "14:00",
+                                "end_time": "15:30"
+                            }
+                        ]
+                    }
+                ],
+                "case_two": [
+                    {
+                        "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "slots": [
+                            {
+                                "day": "Monday"
+                            },
+                            {
+                                "day": "Wednesday",
+                                "start_time": "14:00",
+                                "end_time": "15:30"
+                            }
+                        ]
+                    }
+                ],
+                "case_three": [
+                    {
+                        "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "slots": [
+                            {
+                                "day": [
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday",
+                                    "Sunday"
+                                ],
+                                "start_time": "08:00",
+                                "end_time": "10:30"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "name": "requested_assignments",
+            "description": "Represents user-requested timetable placements where the scheduler should attempt to assign a specific course with the specified teacher, hall, day, and time. These assignments are treated as soft placement requests and do not override availability rules or other hard constraints. The scheduler will try to honor each request when feasible; otherwise, it may place the activity in an alternative valid slot and return diagnostics explaining why the requested placement could not be satisfied.",
+            "examples": {
+                "case_one": [
+                    {
+                        "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "teacher_id": "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "day": "Monday",
+                        "start_time": "09:00",
+                        "end_time": "10:30"
+                    },
+                    {
+                        "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "day": "Tuesday",
+                        "start_time": "11:00",
+                        "end_time": "12:30"
+                    }
+                ],
+                "case_two": [
+                    {
+                        "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "teacher_id": "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "day": "Monday"
+                    },
+                    {
+                        "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "day": "Tuesday",
+                        "start_time": "11:00",
+                        "end_time": "12:30"
+                    }
+                ],
+                "case_three": [
+                    {
+                        "day": [
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday",
+                            "Sunday"
+                        ],
+                        "start_time": "08:00",
+                        "end_time": "10:30",
+                        "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "hall_requested_time_windows",
+            "description": "Represents user-requested preferred days and time ranges where the scheduler should attempt to place activities in a specific hall. These windows do not override hall availability or other hard constraints. If placement within the requested windows is not feasible, the scheduler may schedule the activity elsewhere and will return diagnostics explaining why the request could not be satisfied.",
+            "examples": {
+                "case_one": [
+                    {
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "windows": [
+                            {
+                                "day": "Monday",
+                                "start_time": "08:00",
+                                "end_time": "18:00"
+                            },
+                            {
+                                "day": "Tuesday",
+                                "start_time": "08:00",
+                                "end_time": "18:00"
+                            }
+                        ]
+                    }
+                ],
+                "case_two": [
+                    {
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "windows": [
+                            {
+                                "day": "Monday"
+                            },
+                            {
+                                "day": "Tuesday",
+                                "start_time": "08:00",
+                                "end_time": "18:00"
+                            }
+                        ]
+                    }
+                ],
+                "case_three": [
+                    {
+                        "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+                        "windows": [
+                            {
+                                "start_time": "08:00",
+                                "end_time": "18:00",
+                                "day": [
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday",
+                                    "Sunday"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "name": "teacher_requested_time_windows",
+            "description": "Represents user-requested preferred days and time ranges where the scheduler should attempt to assign teaching sessions for a specific teacher. These requests do not modify the teacher’s availability or other hard constraints. The scheduler will try to satisfy the request when feasible; otherwise, it may place the sessions in alternative valid periods and return diagnostics indicating why the requested windows could not be honored.",
+            "examples": {
+                "case_one": [
+                    {
+                        "teacher_id": "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
+                        "windows": [
+                            {
+                                "day": "Monday",
+                                "start_time": "08:00",
+                                "end_time": "12:00"
+                            },
+                            {
+                                "day": "Wednesday",
+                                "start_time": "13:00",
+                                "end_time": "17:00"
+                            }
+                        ]
+                    }
+                ],
+                "case_two": [
+                    {
+                        "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "windows": [
+                            {
+                                "day":"Monday"
+                            }
+                        ]
+                    }
+                ],
+                "case_three": [
+                    {
+                        "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                        "windows": [
+                            {
+                                "start_time": "08:00",
+                                "end_time": "18:00",
+                                "day": [
+                                    "Monday",
+                                    "Tuesday",
+                                    "Wednesday",
+                                    "Thursday",
+                                    "Friday",
+                                    "Saturday",
+                                    "Sunday"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

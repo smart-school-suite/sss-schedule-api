@@ -1,0 +1,104 @@
+{
+  "constraint_failed": {
+    "type": "MAX_PERIODS_PER_DAY",
+    "severity": "SOFT",
+    "priority": 2,
+    "rule": {
+      "max_allowed_periods": 8,
+      "current_assigned_periods": 9,
+      "day": "Wednesday",
+      "daily": true
+    }
+  },
+
+  "conflict_score": {
+    "total_blockers": 2,
+    "hard_blockers": 1,
+    "soft_blockers": 1
+  },
+
+  "blockers": [
+    {
+      "type": "DAY_PERIOD_CAPACITY_EXCEEDED",
+      "scope": "DAY",
+      "severity": "HARD",
+      "entity": {
+        "type": "SCHOOL_DAY",
+        "id": "WEDNESDAY",
+        "name": "Wednesday"
+      },
+      "conflict": {
+        "current_periods": 9,
+        "max_allowed": 8
+      },
+      "evidence": {
+        "assigned_slots": [
+          { "start_time": "09:00", "end_time": "10:00", "course_id": "8f2d9b1a-..." },
+          { "start_time": "10:00", "end_time": "11:00", "course_id": "7b2e9c1a-..." },
+          { "start_time": "11:00", "end_time": "12:00", "course_id": "4a3b9e1f-..." },
+          { "start_time": "12:00", "end_time": "13:00", "course_id": "9e1f6c5d-..." },
+          { "start_time": "13:00", "end_time": "14:00", "course_id": "f47ac10b-..." },
+          { "start_time": "14:00", "end_time": "15:00", "course_id": "a1b2c3d4-..." },
+          { "start_time": "15:00", "end_time": "16:00", "course_id": "e9876543-..." },
+          { "start_time": "16:00", "end_time": "17:00", "course_id": "b5c6d7e8-..." },
+          { "start_time": "17:00", "end_time": "18:00", "course_id": "d3b07384-..." }
+        ]
+      }
+    },
+
+    {
+      "type": "DAY_REDISTRIBUTION_IMPOSSIBLE",
+      "scope": "GLOBAL",
+      "severity": "SOFT",
+      "entity": {
+        "type": "SCHOOL_DAY",
+        "id": "WEDNESDAY",
+        "name": "Wednesday"
+      },
+      "analysis": {
+        "attempted_days": ["Monday", "Tuesday", "Friday"],
+        "failures": [
+          {
+            "day": "Monday",
+            "reason": "OPERATIONAL_LIMIT",
+            "details": {
+              "closing_time": "15:00"
+            }
+          },
+          {
+            "day": "Tuesday",
+            "reason": "RESOURCE_COLLISION",
+            "related_entity": {
+              "type": "CLASSROOM_GROUP",
+              "id": "STANDARD_ROOMS"
+            }
+          },
+          {
+            "day": "Friday",
+            "reason": "TEACHER_UNAVAILABLE",
+            "related_entity": {
+              "type": "TEACHER",
+              "availability": "PART_TIME_NO_FRIDAY"
+            }
+          }
+        ]
+      }
+    }
+  ],
+
+  "suggestions": [
+    {
+      "action": "RELAX_CONSTRAINT",
+      "target": "MAX_PERIODS_PER_DAY",
+      "parameter": "max_allowed_periods",
+      "proposed_value": 9,
+      "impact": "DAY_LOCAL"
+    },
+    {
+      "action": "ADJUST_OPERATIONAL_HOURS",
+      "target_day": "Monday",
+      "required_extension_minutes": 60,
+      "impact": "GLOBAL"
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "constraint_failed": {
+    "type": "TEACHER_MAX_WEEKLY_HOURS",
+    "details": {
+      "max_weekly_hours": 20
+    }
+  },
+  "blockers": [
+    {
+      "type": "TEACHER_MAX_WEEKLY_HOURS_EXCEEDED",
+      "entity": {
+        "type": "TEACHER",
+        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "name": "Dr. John Doe"
+      },
+      "conflict": {
+        "max_allowed_hours": 4,
+        "actual_hours": 6,
+        "excess": 2
+      },
+      "evidence": {
+        "booked_slots": [
+          {
+            "day": "Monday",
+            "start_time": "09:00",
+            "end_time": "12:00",
+            "course_id": "111e222b-333c-444d-555e-666f777a888b",
+            "hours": 3
+          },
+          {
+            "day": "Monday",
+            "start_time": "13:00",
+            "end_time": "16:00",
+            "course_id": "999d888c-777b-666a-555e-444f333a2221",
+            "hours": 3
+          }
+        ]
+      }
+    },
+    {
+      "type": "DISTRIBUTION_IMPOSSIBLE",
+      "analysis": {
+        "failures": [
+          {
+            "type": "TEACHER_MAX_DAILY_HOURS_EXCEEDED",
+            "entity": {
+              "id": "a2b3c4d5-e6f7-g8h9-i0j1-k2l3m4n5o6p7",
+              "name": "Dr. Jane Smith"
+            },
+            "conflict": {
+              "max_allowed_hours": 4,
+              "current_booked_hours": 5
+            },
+            "evidence": {
+              "booked_slots": [
+                {
+                  "day": "Tuesday",
+                  "start_time": "10:00",
+                  "end_time": "15:00",
+                  "course_id": "222e333b-444c-555d-666e-777f888a999b",
+                  "hours": 5
+                }
+              ]
+            }
+          },
+          {
+            "type": "TEACHER_BUSY",
+            "entity": {
+              "id": "b5c6d7e8-f9g0-h1i2-j3k4-l5m6n7o8p9q0",
+              "name": "Prof. Alan Turing"
+            },
+            "conflict": {
+              "attempted_slots": [
+                {
+                  "day": "Wednesday",
+                  "start_time": "11:00",
+                  "end_time": "14:00"
+                }
+              ]
+            },
+            "evidence": {
+              "busy_slots": [
+                {
+                  "day": "Wednesday",
+                  "start_time": "11:00",
+                  "end_time": "14:00"
+                }
+              ]
+            }
+          },
+          {
+            "type": "TEACHER_UNAVAILABLE",
+            "entity": {
+              "id": "c1d2e3f4-5678-90ab-cdef-1234567890ab",
+              "name": "Dr. Emily Clark"
+            },
+            "conflict": {
+              "attempted_slots": [
+                {
+                  "day": "Thursday",
+                  "start_time": "09:00",
+                  "end_time": "12:00"
+                }
+              ]
+            },
+            "evidence": {
+              "unavailable_slots": [
+                {
+                  "day": "Thursday",
+                  "start_time": "09:00",
+                  "end_time": "12:00"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "INCREASE_MAX_WEEKLY_HOURS",
+      "recommended_value": 22,
+      "impact": "Resolves current schedule but may cause fatigue"
+    },
+    {
+      "action": "ALLOCATE_ADDITIONAL_STAFF",
+      "required_teacher_count": 3,
+      "message": "Add at least 2 more qualified teachers for this department to stay within 4-hour limits"
+    }
+  ]
+}
