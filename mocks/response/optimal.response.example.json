@@ -107,14 +107,8 @@
     ],
     "diagnostics": {
         "constraints": {
-            "hard": {
-                "status": "PASSED",
-                "failed": []
-            },
-            "soft": {
-                "status": "PASSED",
-                "failed": []
-            }
+            "hard":[],
+            "soft":[]
         },
         "summary": {
             "message": "All constraints satisfied.",

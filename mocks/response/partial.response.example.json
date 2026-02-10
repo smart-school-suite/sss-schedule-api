@@ -80,13 +80,10 @@
     ],
     "diagnostics": {
         "constraints": {
-            "hard": {
-                "status": "PASSED",
-                "failed": []
-            },
-            "soft": {
-                "status": "FAILED",
-                "failed": [
+            "hard":[
+                
+            ],
+            "soft":[
                     {
                         "constraint_failed": {
                             "type": "TEACHER_MAX_DAILY_HOURS",
@@ -270,7 +267,6 @@
                         ]
                     }
                 ]
-            }
         },
         "summary": {
             "message": "Timetable generated, but some preferences could not be met.",

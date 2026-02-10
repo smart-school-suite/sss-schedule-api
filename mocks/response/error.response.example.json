@@ -43,19 +43,12 @@
     ],
     "diagnostics": {
       "constraints": {
-        "hard": {
-          "status": "FAILED",
-          "failed": [
-            {
-              "title": "No feasible timetable",
-              "description": "Teacher availability conflicts prevent scheduling all courses."
-            }
-          ]
-        },
-        "soft": {
-          "status": "FAILED",
-          "failed": []
-        }
+        "hard": [
+
+        ],
+        "soft": [
+          
+        ]
       },
       "summary": {
         "message": "Unable to generate a valid timetable.",

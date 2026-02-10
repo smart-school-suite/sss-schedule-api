@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "FIXED_COURSE_SLOT",
+    "type": "requested_assignments",
     "details": {
       "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
       "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
@@ -156,47 +156,46 @@
         "end_time": "12:00"
       },
       "evidence": {
-        "slot":{
-           "start_time": "10:00",
-           "end_time": "12:00",
-           "period_duration_minutes": 120
+        "slot": {
+          "start_time": "10:00",
+          "end_time": "12:00",
+          "period_duration_minutes": 120
         }
       }
-   
     },
-    {   
-       "type":"MAX_COURSE_DAILY_FREQUENCY_EXCEEDED",
-       "entity":{
-          "type":"course_daily_frequency",
-          "max_frequency":2
-       },
-        "conflict":{
-            "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-            "day":"Monday",
-            "current_frequency":3
-        },
-        "evidence":{
-            "course_schedule":[
-                {
-                    "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-                    "day":"Monday",
-                    "start_time":"08:00",
-                    "end_time":"09:30"
-                },
-                {
-                    "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-                    "day":"Monday",
-                    "start_time":"10:00",
-                    "end_time":"11:30"
-                },
-                {
-                    "course_id":"7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-                    "day":"Monday",
-                    "start_time":"13:00",
-                    "end_time":"14:30"
-                }
-            ]
-        }
+    {
+      "type": "MAX_COURSE_DAILY_FREQUENCY_EXCEEDED",
+      "entity": {
+        "type": "course_daily_frequency",
+        "max_frequency": 2
+      },
+      "conflict": {
+        "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+        "day": "Monday",
+        "current_frequency": 3
+      },
+      "evidence": {
+        "course_schedule": [
+          {
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+            "day": "Monday",
+            "start_time": "08:00",
+            "end_time": "09:30"
+          },
+          {
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+            "day": "Monday",
+            "start_time": "10:00",
+            "end_time": "11:30"
+          },
+          {
+            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+            "day": "Monday",
+            "start_time": "13:00",
+            "end_time": "14:30"
+          }
+        ]
+      }
     },
     {
       "type": "MAX_TEACHER_WEEKLY_HOURS_EXCEEDED",
@@ -265,52 +264,96 @@
           }
         ]
       }
-   
     },
     {
-      "type":"MAX_DAILY_PERIODS_EXCEEDED",
-      "entity":{
-         "type":"daily_periods",
-         "day":"Monday",
-         "max_periods":5
+      "type": "MAX_DAILY_PERIODS_EXCEEDED",
+      "entity": {
+        "type": "daily_periods",
+        "day": "Monday",
+        "max_periods": 5
       },
-      "conflict":{
-         "day":"Monday",
-         "current_periods":6
+      "conflict": {
+        "day": "Monday",
+        "current_periods": 6
       },
-      "evidence":{
-         "daily_schedule":[
-            {
-               "course_id":"111e222b-333c-444d-555e-666f777a888b",
-               "start_time":"08:00",
-               "end_time":"09:30"
+      "evidence": {
+        "daily_schedule": [
+          {
+            "course_id": "111e222b-333c-444d-555e-666f777a888b",
+            "start_time": "08:00",
+            "end_time": "09:30"
+          },
+          {
+            "course_id": "222e333b-444c-555d-666e-777f888a999b",
+            "start_time": "10:00",
+            "end_time": "11:30"
+          },
+          {
+            "course_id": "333e444b-555c-666d-777e-888f999a000b",
+            "start_time": "12:00",
+            "end_time": "13:30"
+          },
+          {
+            "course_id": "444e555b-666c-777d-888e-999f000a1111",
+            "start_time": "14:00",
+            "end_time": "15:30"
+          },
+          {
+            "course_id": "555e666b-777c-888d-999e-000f111a2222",
+            "start_time": "16:00",
+            "end_time": "17:30"
+          },
+          {
+            "course_id": "666f777b-888c-999d-000e-111f222a3333",
+            "start_time": "18:00",
+            "end_time": "19:30"
+          }
+        ]
+      }
+    },
+    {
+      "type": "DISTRIBUTION_IMPOSSIBLE",
+      "entity": {
+        "type": "course",
+        "id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+        "name": "Calculus I"
+      },
+      "conflict": {
+        "attempted_slots": [
+          {
+            "day": "monday",
+            "start_time": "07:00",
+            "end_time": "08:00"
+          }
+        ]
+      },
+      "evidence": {
+        "blocking_reasons": [
+          {
+            "type": "HALL_BUSY",
+            "entity": {
+              "type": "HALL",
+              "id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+              "name": "Main Lecture Hall"
             },
-            {
-               "course_id":"222e333b-444c-555d-666e-777f888a999b",
-               "start_time":"10:00",
-               "end_time":"11:30"
+            "conflict": {
+              "day": "Monday",
+              "start_time": "10:00",
+              "end_time": "12:00"
             },
-            {
-               "course_id":"333e444b-555c-666d-777e-888f999a000b",
-               "start_time":"12:00",
-               "end_time":"13:30"
-            },
-            {
-               "course_id":"444e555b-666c-777d-888e-999f000a1111",
-               "start_time":"14:00",
-               "end_time":"15:30"
-            },
-            {
-               "course_id":"555e666b-777c-888d-999e-000f111a2222",
-               "start_time":"16:00",
-               "end_time":"17:30"
-            },
-            {
-               "course_id":"666f777b-888c-999d-000e-111f222a3333",
-               "start_time":"18:00",
-               "end_time":"19:30"
+            "evidence": {
+              "existing_bookings": [
+                {
+                  "course_id": "z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4",
+                  "teacher_id": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
+                  "day": "Monday",
+                  "start_time": "10:00",
+                  "end_time": "12:00"
+                }
+              ]
             }
-         ]
+          }
+        ]
       }
     }
   ]

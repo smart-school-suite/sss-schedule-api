@@ -1,51 +1,72 @@
 {
   "constraint_failed": {
-    "type": "PERIOD_DURATION_CONSTRAINT",
+    "type": "period_duration_minutes",
     "details": {
-      "required_duration_minutes": 45,
-      "is_daily_requirement": true,
-      "reason": "The operational window on specific days is shorter than the required period duration."
-    }
-  },
-  "blockers": [
-    {
-      "type": "INSUFFICIENT_TIME_WINDOW",
-      "description": "The institution's open hours are too narrow to accommodate a 45-minute block.",
-      "affected_days": [
-        {
-          "day": "Monday",
-          "operational_start": "12:30",
-          "operational_end": "12:45",
-          "available_total_minutes": 15,
-          "deficit_minutes": 30
-        },
-        {
-          "day": "Friday",
-          "operational_start": "09:00",
-          "operational_end": "09:30",
-          "available_total_minutes": 30,
-          "deficit_minutes": 15
-        }
-      ]
-    }
-  ],
-  "suggestions": [
-    {
-      "action": "EXPAND_OPERATIONAL_WINDOW",
-      "description": "Increase the operational hours for the affected days to meet the minimum 45-minute threshold.",
-      "proposed_adjustments": [
-        {
-          "day": "Monday",
-          "suggested_start": "12:00",
-          "suggested_end": "12:45",
-          "new_total_minutes": 45
-        }
-      ]
+      "duration_minutes": 60
     },
-    {
-      "action": "REDUCE_PERIOD_DURATION",
-      "description": "Lower the required period length to fit the smallest available operational window.",
-      "suggested_duration": 15
-    }
-  ]
+    "blockers": [
+      {
+        "type": "OPERATIONAL_PERIOD_VIOLATION",
+        "conflict": {
+          "requested_slot": {
+            "day": "Monday",
+            "start_time": "07:00",
+            "end_time": "07:30"
+          }
+        },
+        "evidence": {
+          "operational_calendar": {
+            "daily": true,
+            "active_days": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "operating_hours": [
+              {
+                "day": "Monday",
+                "open_time": "12:30",
+                "close_time": "17:30"
+              },
+              {
+                "day": "Tuesday",
+                "open_time": "08:00",
+                "close_time": "17:00"
+              },
+              {
+                "day": "Wednesday",
+                "open_time": "08:00",
+                "close_time": "11:30"
+              },
+              {
+                "day": "Thursday",
+                "open_time": "08:00",
+                "close_time": "17:00"
+              },
+              {
+                "day": "Friday",
+                "open_time": "08:00",
+                "close_time": "17:30"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "suggestions": [
+      {
+        "action": "MODIFY_OPERATIONAL_CALENDAR",
+        "description": "Extend school hours to include the 12:00 - 12:30 window for the affected days.",
+        "suggested_changes": [
+          {
+            "day": "Monday",
+            "new_start_time": "12:00",
+            "new_end_time": "17:30"
+          }
+        ]
+      }
+    ]
+  }
 }

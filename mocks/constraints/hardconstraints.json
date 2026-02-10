@@ -1,69 +1,99 @@
 {
-     "hard_constraints":[
-         {
-            "name":"break_period",
-            "description":"Specifies launch/break periods during which no classes can be scheduled.",
-            "examples":{
-                 "case_one":{
-                     "start_time":"12:00",
-                     "end_time":"13:00"
-                 },
-                 "case_two":{
-                     "start_time":"15:00",
-                     "end_time":"15:30",
-                     "day_exceptions":[
-                         {
-                             "day":"Friday",
-                             "start_time":"14:00",
-                             "end_time":"15:00"
-                         }
-                     ]
-                 },
-                 "case_three":{
-                    "start_time":"12:00",
-                    "end_time":"13:00",
-                    "no_break_exceptions":["Monday"]
-                 }
-            }
-         },
-         {
-            "name":"operational_period",
-            "description":"Defines the overall operational hours of the institution, outside of which no classes can be scheduled.",
-            "examples":{
-                "case_one":{
-                     "start_time":"07:00",
-                     "end_time":"18:00"
+    "hard_constraints": [
+        {
+            "name": "break_period",
+            "description": "Specifies launch/break periods during which no classes can be scheduled.",
+            "examples": {
+                "case_one": {
+                    "start_time": "12:00",
+                    "end_time": "13:00"
                 },
-                "case_two":{
-                     "start_time":"08:00",
-                     "end_time":"17:00",
-                     "day_exceptions":[
-                         {
-                             "day":"Wednesday",
-                             "start_time":"09:00",
-                             "end_time":"16:00"
-                         }
-                     ]
-                 }
-            }
-         },
-         {
-            "name":"periods",
-            "description":"Specifies the period duration in minutes, for each slots",
-            "examples":{
-                "case_one":{
-                     "period_duration_minutes": 60
+                "case_two": {
+                    "start_time": "15:00",
+                    "end_time": "15:30",
+                    "day_exceptions": [
+                        {
+                            "day": "Friday",
+                            "start_time": "14:00",
+                            "end_time": "15:00"
+                        }
+                    ]
                 },
-                "case_two":{
-                     "period_duration_minutes": 90,
-                     "day_exceptions":[
-                         {
-                             "day":"Tuesday",
-                             "period_duration_minutes": 120
-                         }
-                     ]
-                 }
+                "case_three": {
+                    "start_time": "12:00",
+                    "end_time": "13:00",
+                    "no_break_exceptions": [
+                        "monday"
+                    ],
+                    "day_exceptions": [
+                        {
+                            "day": "Friday",
+                            "start_time": "14:00",
+                            "end_time": "15:00"
+                        }
+                    ]
+                }
             }
-         }
-     ]
+        },
+        {
+            "name": "operational_period",
+            "description": "Defines the overall operational hours of the institution, outside of which no classes can be scheduled.",
+            "examples": {
+                "case_one": {
+                    "start_time": "07:00",
+                    "end_time": "18:00"
+                },
+                "case_two": {
+                    "start_time": "08:00",
+                    "end_time": "17:00",
+                    "day_exceptions": [
+                        {
+                            "day": "wednesday",
+                            "start_time": "09:00",
+                            "end_time": "16:00"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "schedule_period_duration_minutes",
+            "description": "Specifies the period duration in minutes, for each slots",
+            "examples": {
+                "case_one": {
+                    "duration_minutes": 60
+                },
+                "case_two": {
+                    "duration_minutes": 90,
+                    "day_exceptions": [
+                        {
+                            "day": "Tuesday",
+                            "duration_minutes": 120
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "required_joint_course_periods",
+            "examples": [
+                {
+                    "course_id": "00d6c93b-4bf9-4634-adc2-293f3c513c18",
+                    "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "periods": [
+                        {
+                            "day": "Monday",
+                            "start_time": "10:00",
+                            "end_time": "11:00"
+                        },
+                        {
+                            "day": "Wednesday",
+                            "start_time": "14:00",
+                            "end_time": "15:00"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

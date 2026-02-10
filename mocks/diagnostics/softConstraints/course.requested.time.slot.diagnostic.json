@@ -3,9 +3,6 @@
     "type": "FIXED_COURSE_SLOT",
     "details": {
       "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
-      "course_name": "Introduction to Computer Science",
-      "course_code": "CSE101",
-      "course_credit": 3,
       "fixed_slots": [
         {
           "start_time": "10:00",
@@ -32,7 +29,7 @@
         {
           "start_time": "10:00",
           "end_time": "11:00",
-          "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+          "hall_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
           "day": "Monday"
         }
       ],

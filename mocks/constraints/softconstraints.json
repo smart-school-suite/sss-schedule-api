@@ -37,7 +37,7 @@
             }
         },
         {
-            "name": "max_periods_per_day",
+            "name": "schedule_max_periods_per_day",
             "description": "Maximum number of class sessions/periods scheduled in any single day",
             "examples": {
                 "case_one": {
@@ -55,7 +55,7 @@
             }
         },
         {
-            "name": "max_free_periods_per_day",
+            "name": "schedule_max_free_periods_per_day",
             "description": "Maximum number of unscheduled (gap/free) periods allowed per day in the student timetable",
             "examples": {
                 "case_one": {
@@ -73,7 +73,7 @@
             }
         },
         {
-            "name": "max_course_frequency_per_day",
+            "name": "course_max_daily_frequency",
             "description": "Limits how many times the same course can appear on any given day",
             "examples": {
                 "case_one": {
@@ -313,6 +313,49 @@
                                 ]
                             }
                         ]
+                    }
+                ]
+            }
+        },
+        {
+            "name":"requested_free_periods",
+            "description": "Represents user-requested free periods where the scheduler should attempt to create gaps in the student timetable. These requests do not override availability rules or other hard constraints. The scheduler will try to create the requested free periods when feasible; otherwise, it may adjust the schedule and return diagnostics explaining why the requested free periods could not be satisfied.",
+            "examples": {
+                "case_one": [
+                    {
+                        "day": "Monday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "Friday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    }
+                ],
+                "case_two": [
+                    {
+                        "day": "Monday"
+                    },
+                    {
+                        "day": "Friday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    }
+                ],
+                "case_three": [
+                    {
+                        "day": [
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday",
+                            "Sunday"
+                        ],
+                        "start_time": "10:00",
+                        "end_time": "11:00"
                     }
                 ]
             }
