@@ -1,0 +1,116 @@
+{
+  "constraint_failed": {
+    "type": "required_joint_course_periods",
+    "details": {
+      "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+      "period":[
+         {
+            "day": "Monday",
+            "start_time": "07:00",
+            "end_time": "07:30"
+         },
+         {
+            "day": "Wednesday",
+            "start_time": "07:00",
+            "end_time": "07:30"
+         }
+      ]
+    },
+    "blockers": [
+      {
+        "type": "OPERATIONAL_PERIOD_VIOLATION",
+        "conflict": {
+          "requested_slot": {
+            "day": "Monday",
+            "start_time": "07:00",
+            "end_time": "07:30"
+          }
+        },
+        "evidence": {
+          "operational_calendar": {
+            "daily": true,
+            "active_days": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "operating_hours": [
+              {
+                "day": "Monday",
+                "open_time": "12:30",
+                "close_time": "17:30"
+              },
+              {
+                "day": "Tuesday",
+                "open_time": "08:00",
+                "close_time": "17:00"
+              },
+              {
+                "day": "Wednesday",
+                "open_time": "08:00",
+                "close_time": "11:30"
+              },
+              {
+                "day": "Thursday",
+                "open_time": "08:00",
+                "close_time": "17:00"
+              },
+              {
+                "day": "Friday",
+                "open_time": "08:00",
+                "close_time": "17:30"
+              }
+            ]
+          }
+        }
+      },
+           {
+        "type": "BREAK_PERIOD_VIOLATION",
+        "conflict": {
+          "requested_slot": {
+            "day": "Monday",
+            "start_time": "07:00",
+            "end_time": "07:30"
+          }
+        },
+        "evidence": {
+            "break_periods": [
+                 {
+                    "day": "Monday",
+                    "start_time": "07:00",
+                    "end_time": "08:00"
+                 }
+            ]
+        }
+      }
+    ],
+    "suggestions": [
+      {
+        "action": "MODIFY_OPERATIONAL_CALENDAR",
+        "description": "Extend school hours to include the 12:00 - 12:30 window for the affected days.",
+        "suggested_changes": [
+          {
+            "day": "Monday",
+            "new_start_time": "12:00",
+            "new_end_time": "17:30"
+          }
+        ]
+      },
+      {
+        "action": "MODIFY_BREAK_PERIOD",
+        "description": "Adjust the break period to allow scheduling during the 07:00 - 07:30 window on Mondays.",
+        "suggested_changes": [
+          {
+            "day": "Monday",
+            "new_start_time": "08:00",
+            "new_end_time": "09:00"
+          }
+        ]
+      }
+    ]
+  }
+}
