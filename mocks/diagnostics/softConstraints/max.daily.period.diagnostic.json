@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "MAX_PERIODS_PER_DAY",
+    "type": "Mschedule_max_periods_per_day",
     "severity": "SOFT",
     "priority": 2,
     "rule": {

@@ -1,13 +1,13 @@
 {
   "constraint_failed": {
-    "type": "FIXED_COURSE_SLOT",
+    "type": "course_requested_time_slots",
     "details": {
       "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+      "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
       "fixed_slots": [
         {
           "start_time": "10:00",
-          "end_time": "11:00",
-          "day": "Monday"
+          "end_time": "11:00"
         },
         {
           "start_time": "10:00",
@@ -15,80 +15,222 @@
           "day": "Wednesday"
         },
         {
-          "start_time": "10:00",
-          "end_time": "11:00",
           "day": "Friday"
         }
       ]
-    }
-  },
-  "blockers": [
-    {
-      "type": "HALL_UNAVAILABLE",
-      "blocked_slot": [
-        {
-          "start_time": "10:00",
-          "end_time": "11:00",
-          "hall_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
-          "day": "Monday"
-        }
-      ],
-      "hall_details": [
-        {
-          "hall_id": "hall-res-001-north",
-          "hall_name": "Main Lecture Hall",
-          "busy_slots": [
-            {
-              "start_time": "09:30",
-              "end_time": "11:30",
-              "day": "Monday"
-            }
-          ]
-        }
-      ]
     },
-    {
-      "type": "TEACHER_BUSY",
-      "teacher_busy_details": [
-        {
-          "teacher_id": "prof-5521",
-          "teacher_name": "Dr. John Doe",
-          "busy_slots": [
+    "blockers": [
+      {
+        "diagnostic_id": [
+          "diagnostic-001"
+        ]
+      },
+      {
+        "diagnostic_id": [
+          "diagnostic-002",
+          "diagnostic-003"
+        ]
+      },
+      {
+        "type": "DISTRIBUTION_IMPOSSIBLE",
+        "entity": {
+          "type": "HALL_SLOT",
+          "hall_id": "550e8400-e29b-41d4-a716-446655440000",
+          "day": "monday"
+        },
+        "conflict": {
+          "attempted_slots": [
             {
-              "start_time": "10:00",
-              "end_time": "12:00",
-              "day": "Monday"
+              "day": "wednesday",
+              "interval": [
+                {
+                  "start_time": "07:00",
+                  "end_time": "08:00"
+                },
+                {
+                  "start_time": "08:00",
+                  "end_time": "09:00"
+                },
+                {
+                  "start_time": "09:00",
+                  "end_time": "10:00"
+                },
+                {
+                  "start_time": "11:00",
+                  "end_time": "12:00"
+                },
+                {
+                  "start_time": "13:00",
+                  "end_time": "14:00"
+                },
+                {
+                  "start_time": "14:00",
+                  "end_time": "15:00"
+                },
+                {
+                  "start_time": "15:00",
+                  "end_time": "16:00"
+                }
+              ]
+            }
+          ]
+        },
+        "evidence": {
+          "blocking_reasons": [
+            {
+              "type": "HALL_BUSY",
+              "entity": {
+                "type": "HALL",
+                "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6"
+              },
+              "conflict": {
+                "attempted_slot": {
+                  "day": "Wednesday",
+                  "start_time": "10:00",
+                  "end_time": "11:00"
+                }
+              },
+              "evidence": {
+                "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+                "scheduled_slots": [
+                  {
+                    "start_time": "10:00",
+                    "end_time": "11:00",
+                    "day": "Monday",
+                    "course_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "MAX_COURSE_MAX_DAILY_FREQUENCY",
+              "entity": {
+                "type": "COURSE",
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+              },
+              "conflict": {
+                "attempted_slot": {
+                  "day": "Wednesday",
+                  "start_time": "10:00",
+                  "end_time": "11:00",
+                  "max_frequency": 2,
+                  "current_frequency": 3
+                }
+              },
+              "evidence": {
+                "scheduled_slots": [
+                  {
+                    "start_time": "07:00",
+                    "end_time": "08:00",
+                    "course_id": "7f6e5d4c-3b2a-1f0e-9d8c-7b6a5c4d3e2f"
+                  }
+                ],
+                "max_frequency": 2,
+                "current_frequency": 3
+              }
             }
           ]
         }
-      ]
-    },
-    {
-      "type": "TEACHER_UNAVAILABLE",
-      "teacher_time_preferences": [
-        {
-          "teacher_id": "prof-5521",
-          "teacher_name": "Dr. John Doe",
-          "avaliable_slots": [
+      },
+      {
+        "type": "DISTRIBUTION_IMPOSSIBLE",
+        "entity": {
+          "type": "HALL_SLOT",
+          "hall_id": "550e8400-e29b-41d4-a716-446655440000",
+          "start_time": "09:00",
+          "end_time": "11:00"
+        },
+        "conflict": {
+          "attempted_slots": [
             {
-              "start_time": "13:00",
-              "end_time": "17:00",
-              "day": "Monday"
+              "day": "monday",
+              "start_time": "09:00",
+              "end_time": "11:00"
+            },
+            {
+              "day": "tuesday",
+              "start_time": "09:00",
+              "end_time": "11:00"
+            },
+            {
+              "day": "wednesday",
+              "start_time": "09:00",
+              "end_time": "11:00"
+            },
+            {
+              "day": "thursday",
+              "start_time": "09:00",
+              "end_time": "11:00"
+            },
+            {
+              "day": "friday",
+              "start_time": "09:00",
+              "end_time": "11:00"
+            },
+            {
+              "day": "saturday",
+              "start_time": "09:00",
+              "end_time": "11:00"
+            }
+          ]
+        },
+        "evidence": {
+          "blocking_reasons": [
+            {
+              "type": "HALL_BUSY",
+              "entity": {
+                "type": "HALL",
+                "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6"
+              },
+              "conflict": {
+                "attempted_slot": {
+                  "day": "Wednesday",
+                  "start_time": "10:00",
+                  "end_time": "11:00"
+                }
+              },
+              "evidence": {
+                "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+                "scheduled_slots": [
+                  {
+                    "start_time": "10:00",
+                    "end_time": "11:00",
+                    "day": "Monday",
+                    "course_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "MAX_COURSE_MAX_DAILY_FREQUENCY",
+              "entity": {
+                "type": "COURSE",
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+              },
+              "conflict": {
+                "attempted_slot": {
+                  "day": "Wednesday",
+                  "start_time": "10:00",
+                  "end_time": "11:00",
+                  "max_frequency": 2,
+                  "current_frequency": 3
+                }
+              },
+              "evidence": {
+                "scheduled_slots": [
+                  {
+                    "start_time": "07:00",
+                    "end_time": "08:00",
+                    "course_id": "7f6e5d4c-3b2a-1f0e-9d8c-7b6a5c4d3e2f"
+                  }
+                ],
+                "max_frequency": 2,
+                "current_frequency": 3
+              }
             }
           ]
         }
-      ]
-    }
-  ],
-  "suggestions": [
-    {
-      "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
-      "course_name": "Introduction to Computer Science",
-      "course_code": "CSE101",
-      "course_credit": 3,
-      "start_time": "14:00",
-      "end_time": "15:00",
-      "day": "Monday"
-    }
-  ]
+      }
+    ]
+  }
 }

@@ -183,7 +183,6 @@
     {
       "action": "CHANGE_RESOURCE",
       "target": "teacher",
-      "description": "Re-assign or find substitute teacher for one of the conflicting slots",
       "affected_slot": {
         "day": "Monday",
         "start_time": "14:00",
@@ -194,7 +193,6 @@
     {
       "action": "RELAX_RESOURCE_CONSTRAINT",
       "target": "hall_capacity",
-      "description": "Increase capacity or allow overflow for SCIENCE_LABS on Wednesday",
       "impact": "MEDIUM"
     }
   ]

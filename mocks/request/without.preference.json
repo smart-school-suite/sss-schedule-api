@@ -1,0 +1,396 @@
+{
+    "teachers": [
+        {
+            "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "teacher_name": "Dr. Sarah Johnson"
+        },
+        {
+            "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+            "teacher_name": "Prof. Michael Chen"
+        }
+    ],
+    "teacher_busy_periods": [
+        {
+            "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "start_time": "11:00",
+            "end_time": "13:00",
+            "day": "Monday"
+        },
+        {
+            "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+            "start_time": "13:00",
+            "end_time": "15:00",
+            "day": "Tuesday"
+        }
+    ],
+    "teacher_courses": [
+        {
+            "course_id": "c1a2b3c4-d5e6-7890-abcd-ef1234567890",
+            "course_code": "CS101",
+            "course_name": "Introduction to Computer Science",
+            "course_credit": 3,
+            "course_type": [
+                "theoretical"
+            ],
+            "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        },
+        {
+            "course_id": "c2b3c4d5-e6f7-8901-bcde-f12345678901",
+            "course_code": "CS102",
+            "course_name": "Programming Fundamentals",
+            "course_credit": 4,
+            "course_type": [
+                "theoretical",
+                "practical"
+            ],
+            "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        },
+        {
+            "course_id": "d3e4f5g6-h7i8-9012-ijkl-m12345678902",
+            "course_code": "CS201",
+            "course_name": "Data Structures & Algorithms",
+            "course_credit": 4,
+            "course_type": [
+                "theoretical"
+            ],
+            "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+        }
+    ],
+    "halls": [
+        {
+            "hall_id": "h1a2b3c4-d5e6-7890-abcd-ef1234567890",
+            "hall_name": "Main Lecture Hall A",
+            "capacity": 250,
+            "hall_type": [
+                "Lecture"
+            ]
+        },
+        {
+            "hall_id": "h2b3c4d5-e6f7-8901-bcde-f12345678901",
+            "hall_name": "Advanced Computing Lab",
+            "capacity": 45,
+            "hall_type": [
+                "Practical"
+            ]
+        },
+        {
+            "hall_id": "h3c4d5e6-f7a8-9012-cdef-g12345678902",
+            "hall_name": "Grand Amphitheater",
+            "capacity": 500,
+            "hall_type": [
+                "Lecture"
+            ]
+        },
+        {
+            "hall_id": "h4d5e6f7-g8a9-0123-defg-h12345678903",
+            "hall_name": "Physics Seminar Room",
+            "capacity": 30,
+            "hall_type": [
+                "Lecture"
+            ]
+        }
+    ],
+    "hall_busy_periods": [
+        {
+            "hall_id": "h1a2b3c4-d5e6-7890-abcd-ef1234567890",
+            "hall_name": "Main Lecture Hall A",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "day": "Monday"
+        },
+        {
+            "hall_id": "h2b3c4d5-e6f7-8901-bcde-f12345678901",
+            "hall_name": "Advanced Computing Lab",
+            "start_time": "14:00",
+            "end_time": "16:00",
+            "day": "Wednesday"
+        },
+        {
+            "hall_id": "h3c4d5e6-f7a8-9012-cdef-g12345678902",
+            "hall_name": "Grand Amphitheater",
+            "start_time": "09:00",
+            "end_time": "11:00",
+            "day": "Friday"
+        }
+    ],
+    "hard_constraints": {
+        "break_period": {
+            "start_time": "12:00",
+            "end_time": "12:30",
+            "day_exceptions": [
+                {
+                    "day": "Monday",
+                    "start_time": "12:30",
+                    "end_time": "13:00"
+                },
+                {
+                    "day": "Wednesday",
+                    "start_time": "12:30",
+                    "end_time": "13:00"
+                }
+            ],
+            "no_break_exceptions": [
+                "saturday"
+            ]
+        },
+        "operational_period": {
+            "start_time": "08:00",
+            "end_time": "18:00",
+            "day_exceptions": [
+                {
+                    "day": "Monday",
+                    "start_time": "09:00",
+                    "end_time": "17:00"
+                },
+                {
+                    "day": "Wednesday",
+                    "start_time": "09:00",
+                    "end_time": "17:00"
+                }
+            ],
+            "no_operational_period_exceptions": [
+                "sunday"
+            ]
+        },
+        "schedule_period_duration_minutes": {
+            "duration_minutes": 60,
+            "day_exceptions": [
+                {
+                    "day": "Tuesday",
+                    "duration_minutes": 90
+                },
+                {
+                    "day": "Thursday",
+                    "duration_minutes": 90
+                }
+            ]
+        },
+        "required_joint_course_periods": [
+            {
+                "course_id": "00d6c93b-4bf9-4634-adc2-293f3c513c18",
+                "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "periods": [
+                    {
+                        "day": "monday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "wednesday",
+                        "start_time": "14:00",
+                        "end_time": "15:00"
+                    }
+                ]
+            }
+        ]
+    },
+    "soft_constraints": {
+        "teacher_max_daily_hours": {
+            "max_hours": 8,
+            "teacher_exceptions": [
+                {
+                    "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "max_hours": 10
+                },
+                {
+                    "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                    "max_hours": 6
+                }
+            ]
+        },
+        "teacher_max_weekly_hours": {
+            "max_hours": 40,
+            "teacher_exceptions": [
+                {
+                    "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "max_hours": 45
+                },
+                {
+                    "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                    "max_hours": 30
+                }
+            ]
+        },
+        "schedule_max_periods_per_day": {
+            "max_periods": 5,
+            "day_exceptions": [
+                {
+                    "day": "monday",
+                    "max_periods": 6
+                },
+                {
+                    "day": "wednesday",
+                    "max_periods": 6
+                }
+            ]
+        },
+        "schedule_max_free_periods_per_day": {
+            "max_free_periods": 2,
+            "day_exceptions": [
+                {
+                    "day": "tuesday",
+                    "max_free_periods": 3
+                },
+                {
+                    "day": "thursday",
+                    "max_free_periods": 3
+                }
+            ]
+        },
+        "course_max_daily_frequency": {
+            "max_frequency": 1,
+            "course_exceptions": [
+                {
+                    "course_id": "c1a2b3c4-d5e6-7890-abcd-ef1234567890",
+                    "max_frequency": 2
+                },
+                {
+                    "course_id": "c2b3c4d5-e6f7-8901-bcde-f12345678901",
+                    "max_frequency": 2
+                }
+            ]
+        },
+        "course_requested_time_slots": [
+            {
+                "course_id": "c1a2b3c4-d5e6-7890-abcd-ef1234567890",
+                "requested_time_slots": [
+                    {
+                        "day": "monday",
+                        "start_time": "08:00",
+                        "end_time": "10:00"
+                    },
+                    {
+                        "start_time": "14:00",
+                        "end_time": "16:00"
+                    },
+                    {
+                        "day": "tuesday"
+                    }
+                ]
+            },
+            {
+                "course_id": "c2b3c4d5-e6f7-8901-bcde-f12345678901",
+                "requested_time_slots": [
+                    {
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "thursday",
+                        "start_time": "13:00",
+                        "end_time": "15:00"
+                    },
+                    {
+                        "day": "friday"
+                    }
+                ]
+            }
+        ],
+        "requested_assignments": [
+            {
+                "course_id": "c1a2b3c4-d5e6-7890-abcd-ef1234567890",
+                "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "hall_id": "h1a2b3c4-d5e6-7890-abcd-ef1234567890",
+                "day": "monday",
+                "start_time": "08:00",
+                "end_time": "10:00"
+            },
+            {
+                "course_id": "c2b3c4d5-e6f7-8901-bcde-f12345678901",
+                "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "hall_id": "h2b3c4d5-e6f7-8901-bcde-f12345678901",
+                "day": "thursday"
+            },
+            {
+                "course_id": "d3e4f5g6-h7i8-9012-ijkl-m12345678902",
+                "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                "hall_id": "h3c4d5e6-f7a8-9012-cdef-g12345678902",
+                "start_time": "09:00",
+                "end_time": "11:00"
+            }
+        ],
+        "hall_requested_time_windows": [
+            {
+                "hall_id": "h1a2b3c4-d5e6-7890-abcd-ef1234567890",
+                "requested_time_windows": [
+                    {
+                        "day": "monday",
+                        "start_time": "08:00",
+                        "end_time": "9:00"
+                    },
+                    {
+                        "day": "wednesday"
+                    },
+                    {
+                        "start_time": "08:00",
+                        "end_time": "9:00"
+                    }
+                ]
+            },
+            {
+                "hall_id": "h2b3c4d5-e6f7-8901-bcde-f12345678901",
+                "requested_time_windows": [
+                    {
+                        "day": "tuesday",
+                        "start_time": "08:00",
+                        "end_time": "18:00"
+                    },
+                    {
+                        "day": "thursday",
+                        "start_time": "08:00",
+                        "end_time": "18:00"
+                    }
+                ]
+            }
+        ],
+        "teacher_requested_time_windows": [
+            {
+                "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "requested_time_windows": [
+                    {
+                        "day": "monday",
+                        "start_time": "08:00",
+                        "end_time": "10:00"
+                    },
+                    {
+                        "start_time": "14:00",
+                        "end_time": "16:00"
+                    },
+                    {
+                        "day": "friday"
+                    }
+                ]
+            },
+            {
+                "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                "requested_time_windows": [
+                    {
+                        "day": "tuesday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "thursday",
+                        "start_time": "13:00",
+                        "end_time": "15:00"
+                    }
+                ]
+            }
+        ],
+        "requested_free_periods": [
+            {
+                "day": "monday",
+                "start_time": "12:00",
+                "end_time": "13:00"
+            },
+            {
+                "day": "wednesday"
+            },
+            {
+                "day": "friday",
+                "start_time": "14:00",
+                "end_time": "15:00"
+            }
+        ]
+    }
+}

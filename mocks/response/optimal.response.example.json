@@ -105,10 +105,13 @@
             ]
         }
     ],
+    "diagnostic_error_pool": [
+        
+    ],
     "diagnostics": {
         "constraints": {
-            "hard":[],
-            "soft":[]
+            "hard": [],
+            "soft": []
         },
         "summary": {
             "message": "All constraints satisfied.",

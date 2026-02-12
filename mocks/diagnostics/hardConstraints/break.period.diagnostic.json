@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "FIXED_BREAK_SLOT",
+    "type": "break_period",
     "details": {
       "start_time": "12:00",
       "end_time": "12:30"

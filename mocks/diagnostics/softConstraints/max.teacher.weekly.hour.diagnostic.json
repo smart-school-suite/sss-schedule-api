@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "TEACHER_MAX_WEEKLY_HOURS",
+    "type": "teacher_max_weekly_hours",
     "details": {
       "max_weekly_hours": 20
     }

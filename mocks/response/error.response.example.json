@@ -41,6 +41,9 @@
         ]
       }
     ],
+    "diagnostic_error_pool":[
+
+    ],
     "diagnostics": {
       "constraints": {
         "hard": [

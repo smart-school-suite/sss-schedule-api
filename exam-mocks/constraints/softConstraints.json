@@ -1,0 +1,99 @@
+{
+    "soft_constraints": [
+        {
+            "name": "exam_max_number_of_sessions_per_day",
+            "description": "Limits the number of sessions that can be scheduled for a course on a single day. This constraint helps to prevent overloading students and allows for better distribution of classes throughout the week.",
+            "example": {
+                "max_sessions": 2,
+                "day_exceptions": [
+                    {
+                        "day": "monday",
+                        "max_sessions": 3
+                    }
+                ]
+            }
+        },
+        {
+            "name": "exam_max_number_of_course_per_invigilator_per_day",
+            "description": "Limits the number of courses an invigilator can oversee in a single day. This constraint ensures that invigilators are not overburdened and can effectively manage their assigned courses.",
+            "example": {
+                "max_courses": 3,
+                "day_exceptions": [
+                    {
+                        "day": "tuesday",
+                        "max_courses": 4
+                    }
+                ]
+            }
+        },
+        {
+            "name": "requested_course_exam_slot",
+            "description": "Allows courses to request specific time slots for their exams. This constraint can be used to accommodate special needs, avoid conflicts with other courses, or align with students' preferences.",
+            "examples": {
+                "case_one": [
+                    {
+                        "course_id": "123e4567-e89b-12d3-a456-426614174000",
+                        "day": "wednesday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    }
+                ],
+                "case_two": [
+                    {
+                        "course_id": "123e4567-e89b-12d3-a456-426614174000",
+                        "day": "thursday"
+                    }
+                ],
+                "case_three": [
+                    {
+                        "course_id": "123e4567-e89b-12d3-a456-426614174000",
+                        "start_time": "14:00",
+                        "end_time": "16:00"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "exam_invigilator_requested_slot",
+            "description": "Allows invigilators to request specific time slots for overseeing exams. This constraint can help accommodate invigilators' availability and preferences, ensuring a more efficient scheduling process.",
+            "examples": {
+                "case_one": [
+                    {
+                        "invigilator_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f",
+                        "day": "wednesday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    }
+                ],
+                "case_two": [
+                    {
+                        "invigilator_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f",
+                        "day": "thursday"
+                    }
+                ],
+                "case_three": [
+                    {
+                        "invigilator_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f",
+                        "start_time": "14:00",
+                        "end_time": "16:00"
+                    }
+                ]
+            }
+        },
+        {
+            "name":"exam_requested_assignement",
+            "description":"Allows both courses and invigilators to request specific assignments for exams. This constraint can be used to accommodate preferences, avoid conflicts, or align with specific requirements for certain courses or invigilators.",
+            "examples":{
+                "case_one":[
+                    {
+                        "course_id":"123e4567-e89b-12d3-a456-426614174000",
+                        "invigilator_id":"9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f",
+                        "day":"wednesday",
+                        "start_time":"10:00",
+                        "end_time":"11:00"
+                    }
+                ]
+             }
+        }
+    ]
+}

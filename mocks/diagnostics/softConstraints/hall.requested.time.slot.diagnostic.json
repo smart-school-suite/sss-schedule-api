@@ -1,12 +1,18 @@
 {
     "constraint_failed": {
-        "type": "HALL_TIME_WINDOWS",
+        "type": "hall_requested_time_windows",
         "details": {
             "hall_id": "550e8400-e29b-41d4-a716-446655440000",
-            "hall_name": "Hall A",
             "windows": [
                 {
-                    "day": "Monday",
+                    "day": "monday",
+                    "start_time": "09:00",
+                    "end_time": "11:00"
+                },
+                {
+                    "day": "wednesday"
+                },
+                {
                     "start_time": "09:00",
                     "end_time": "11:00"
                 }
@@ -15,52 +21,204 @@
     },
     "blockers": [
         {
-            "type": "INSTRUCTOR_UNAVAILABLE",
-            "instructor_details": [
-                {
-                    "instructor_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-                    "instructor_name": "Dr. John Doe",
-                    "busy_slots": [
-                        {
-                            "start_time": "10:00",
-                            "end_time": "12:00",
-                            "day": "Monday"
+            "type": "DISTRIBUTION_IMPOSSIBLE",
+            "entity": {
+                "type": "HALL_SLOT",
+                "hall_id": "550e8400-e29b-41d4-a716-446655440000",
+                "day": "monday"
+            },
+            "conflict": {
+                "attempted_slots": [
+                    {
+                        "day": "wednesday",
+                        "interval": [
+                            {
+                                "start_time": "07:00",
+                                "end_time": "08:00"
+                            },
+                            {
+                                "start_time": "08:00",
+                                "end_time": "09:00"
+                            },
+                            {
+                                "start_time": "09:00",
+                                "end_time": "10:00"
+                            },
+                            {
+                                "start_time": "11:00",
+                                "end_time": "12:00"
+                            },
+                            {
+                                "start_time": "13:00",
+                                "end_time": "14:00"
+                            },
+                            {
+                                "start_time": "14:00",
+                                "end_time": "15:00"
+                            },
+                            {
+                                "start_time": "15:00",
+                                "end_time": "16:00"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "evidence": {
+                "blocking_reasons": [
+                    {
+                        "type": "HALL_BUSY",
+                        "entity": {
+                            "type": "HALL",
+                            "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6"
+                        },
+                        "conflict": {
+                            "attempted_slot": {
+                                "day": "Wednesday",
+                                "start_time": "10:00",
+                                "end_time": "11:00"
+                            }
+                        },
+                        "evidence": {
+                            "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+                            "scheduled_slots": [
+                                {
+                                    "start_time": "10:00",
+                                    "end_time": "11:00",
+                                    "day": "Monday",
+                                    "course_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f"
+                                }
+                            ]
                         }
-                    ]
-                }
-            ]
+                    },
+                    {
+                        "type": "MAX_COURSE_MAX_DAILY_FREQUENCY",
+                        "entity": {
+                            "type": "COURSE",
+                            "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+                        },
+                        "conflict": {
+                            "attempted_slot": {
+                                "day": "Wednesday",
+                                "start_time": "10:00",
+                                "end_time": "11:00",
+                                "max_frequency": 2,
+                                "current_frequency": 3
+                            }
+                        },
+                        "evidence": {
+                            "scheduled_slots": [
+                                {
+                                    "start_time": "07:00",
+                                    "end_time": "08:00",
+                                    "course_id": "7f6e5d4c-3b2a-1f0e-9d8c-7b6a5c4d3e2f"
+                                }
+                            ],
+                            "max_frequency": 2,
+                            "current_frequency": 3
+                        }
+                    }
+                ]
+            }
         },
         {
-            "type": "TEACHER_BUSY",
-            "teacher_busy_details": [
-                {
-                    "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-                    "teacher_name": "Dr. John Doe",
-                    "busy_slots": [
-                        {
-                            "start_time": "10:00",
-                            "end_time": "12:00",
-                            "day": "Monday"
+            "type": "DISTRIBUTION_IMPOSSIBLE",
+            "entity": {
+                "type": "HALL_SLOT",
+                "hall_id": "550e8400-e29b-41d4-a716-446655440000",
+                "start_time": "09:00",
+                "end_time": "11:00"
+            },
+            "conflict": {
+                "attempted_slots": [
+                    {
+                        "day": "monday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "tuesday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "wednesday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "thursday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "friday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    },
+                    {
+                        "day": "saturday",
+                        "start_time": "09:00",
+                        "end_time": "11:00"
+                    }
+                ]
+            },
+            "evidence": {
+                "blocking_reasons": [
+                    {
+                        "type": "HALL_BUSY",
+                        "entity": {
+                            "type": "HALL",
+                            "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6"
+                        },
+                        "conflict": {
+                            "attempted_slot": {
+                                "day": "Wednesday",
+                                "start_time": "10:00",
+                                "end_time": "11:00"
+                            }
+                        },
+                        "evidence": {
+                            "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+                            "scheduled_slots": [
+                                {
+                                    "start_time": "10:00",
+                                    "end_time": "11:00",
+                                    "day": "Monday",
+                                    "course_id": "9f8e7d6c-5b4a-3f2e-1d0c-9a8b7c6d5e4f"
+                                }
+                            ]
                         }
-                    ]
-                }
-            ]
-        },
-        {
-            "type": "TEACHER_UNAVAILABLE",
-            "teacher_time_preferences": [
-                {
-                    "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-                    "teacher_name": "Dr. John Doe",
-                    "avaliable_slots": [
-                        {
-                            "start_time": "09:00",
-                            "end_time": "11:00",
-                            "day": "Monday"
+                    },
+                    {
+                        "type": "MAX_COURSE_MAX_DAILY_FREQUENCY",
+                        "entity": {
+                            "type": "COURSE",
+                            "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+                        },
+                        "conflict": {
+                            "attempted_slot": {
+                                "day": "Wednesday",
+                                "start_time": "10:00",
+                                "end_time": "11:00",
+                                "max_frequency": 2,
+                                "current_frequency": 3
+                            }
+                        },
+                        "evidence": {
+                            "scheduled_slots": [
+                                {
+                                    "start_time": "07:00",
+                                    "end_time": "08:00",
+                                    "course_id": "7f6e5d4c-3b2a-1f0e-9d8c-7b6a5c4d3e2f"
+                                }
+                            ],
+                            "max_frequency": 2,
+                            "current_frequency": 3
                         }
-                    ]
-                }
-            ]
+                    }
+                ]
+            }
         }
     ],
     "suggestions": [
