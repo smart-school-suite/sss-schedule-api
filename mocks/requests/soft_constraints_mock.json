@@ -1,0 +1,27 @@
+{
+  "teachers": [{"teacher_id": "t1", "name": "Dr. Smith"}],
+  "teacher_courses": [
+    {"course_id": "c1", "course_title": "Math", "course_credit": 2, "course_type": "theory", "course_hours": 20, "teacher_id": "t1", "teacher_name": "Dr. Smith"},
+    {"course_id": "c2", "course_title": "Physics", "course_credit": 2, "course_type": "theory", "course_hours": 20, "teacher_id": "t1", "teacher_name": "Dr. Smith"}
+  ],
+  "halls": [{"hall_id": "h1", "hall_name": "Room 101", "hall_capacity": 50, "hall_type": "lecture"}],
+  "teacher_busy_period": [],
+  "teacher_prefered_teaching_period": [],
+  "hall_busy_periods": [],
+  "break_period": {"start_time": "12:00", "end_time": "13:00", "daily": true},
+  "operational_period": {
+    "start_time": "08:00",
+    "end_time": "17:00",
+    "daily": true,
+    "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    "constrains": []
+  },
+  "periods": {"daily": true, "period": 60},
+  "soft_constrains": {
+    "teacher_max_daily_hours": {"max_hours": 6, "teacher_exceptions": [{"teacher_id": "t1", "max_hours": 8}]},
+    "teacher_max_weekly_hours": 20,
+    "schedule_max_periods_per_day": {"max_periods": 6},
+    "course_requested_time_slots": [{"course_id": "c1", "slots": [{"day": "monday", "start_time": "09:00", "end_time": "10:00"}, {"day": "wednesday", "start_time": "14:00", "end_time": "15:00"}]}],
+    "requested_free_periods": [{"day": "monday", "start_time": "10:00", "end_time": "11:00"}]
+  }
+}

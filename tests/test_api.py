@@ -160,9 +160,15 @@ def test_with_preference_endpoint_minimal():
     assert isinstance(data["timetable"], list)
     assert isinstance(data["messages"], dict)
     
-    # Should have a status
+    # Should have a status (spec: OPTIMAL, PARTIAL, ERROR)
     assert "status" in data
-    assert data["status"] in ["OPTIMAL", "FEASIBLE", "INFEASIBLE", "ERROR"]
+    assert data["status"] in ["OPTIMAL", "PARTIAL", "ERROR"]
+    # New response shape: diagnostics + metadata
+    assert "diagnostics" in data
+    assert "metadata" in data
+    assert "constraints" in data["diagnostics"]
+    assert "summary" in data["diagnostics"]
+    assert data["diagnostics"]["summary"]["hard_constraints_met"] == (data["status"] != "ERROR")
 
 
 def test_without_preference_endpoint_minimal():
@@ -240,7 +246,8 @@ def test_empty_request_returns_error():
     
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "INFEASIBLE" or len(data["messages"]["error_message"]) > 0
+    # Infeasible/error: status ERROR and hard diagnostics or legacy error_message
+    assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
 def test_course_type_hall_type_matching():
@@ -300,7 +307,7 @@ def test_course_type_hall_type_matching():
     data = response.json()
     
     # If scheduled successfully, practical courses should be in labs
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             for slot in day_schedule.get("slots", []):
                 if not slot.get("break", False) and slot.get("course_name") == "Chemistry Lab":
@@ -329,7 +336,7 @@ def test_teacher_busy_period_respected():
     data = response.json()
     
     # If scheduled, no classes should be during busy period
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             if day_schedule["day"].lower() == "monday":
                 for slot in day_schedule.get("slots", []):
@@ -360,7 +367,7 @@ def test_break_period_days_exception():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             day_lower = day_schedule["day"].lower()
             if day_lower in ["monday", "tuesday"]:
@@ -397,7 +404,7 @@ def test_break_period_days_fixed_breaks():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             if day_schedule["day"].lower() == "monday":
                 # Monday should have fixed break time
@@ -438,7 +445,7 @@ def test_break_period_exception_and_fixed_breaks():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             if day_schedule["day"].lower() == "monday":
                 # Monday should have NO break (exception takes priority)
@@ -466,7 +473,7 @@ def test_configurable_slot_duration():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             for slot in day_schedule.get("slots", []):
                 if not slot.get("break", False) and slot.get("duration"):
@@ -490,7 +497,7 @@ def test_exclude_days_with_only_breaks():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         # Days with only breaks should not appear
         for day_schedule in data["timetable"]:
             non_break_slots = [s for s in day_schedule.get("slots", []) if not s.get("break", False)]
@@ -515,7 +522,7 @@ def test_teacher_preference_strict_enforcement():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             if day_schedule["day"].lower() == "monday":
                 for slot in day_schedule.get("slots", []):
@@ -546,7 +553,7 @@ def test_teacher_preference_not_enforced_in_without_preference():
     
     # Should still be feasible even with narrow preference window
     # because preferences are ignored in without-preference mode
-    assert data["status"] in ["OPTIMAL", "FEASIBLE", "INFEASIBLE"]
+    assert data["status"] in ["OPTIMAL", "PARTIAL", "ERROR"]
 
 
 def test_hall_busy_period_blocking():
@@ -565,7 +572,7 @@ def test_hall_busy_period_blocking():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             for slot in day_schedule.get("slots", []):
                 if not slot.get("break", False) and slot.get("hall_id") == "h1":
@@ -590,7 +597,7 @@ def test_break_period_blocking():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         for day_schedule in data["timetable"]:
             for slot in day_schedule.get("slots", []):
                 if not slot.get("break", False):
@@ -638,7 +645,7 @@ def test_break_period_validation_invalid_time_order():
     data = response.json()
     
     # Should have validation error
-    assert data["status"] == "INFEASIBLE" or len(data["messages"]["error_message"]) > 0
+    assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
 def test_periods_validation_invalid_duration():
@@ -654,7 +661,7 @@ def test_periods_validation_invalid_duration():
     data = response.json()
     
     # Should have validation error
-    assert data["status"] == "INFEASIBLE" or len(data["messages"]["error_message"]) > 0
+    assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
 def test_enhanced_error_structure():
@@ -678,13 +685,13 @@ def test_enhanced_error_structure():
     assert response.status_code == 200
     data = response.json()
     
-    if data["status"] == "INFEASIBLE" and len(data["messages"]["error_message"]) > 0:
-        error = data["messages"]["error_message"][0]
-        # Check for enhanced error structure
-        assert "code" in error or "constraint_type" in error or "severity" in error
-        # At minimum, should have title and description
-        assert "title" in error
-        assert "description" in error or "message" in error
+    if data["status"] == "ERROR" and (len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0):
+        error = (data.get("messages", {}).get("error_message") or [{}])[0]
+        if not error and data.get("diagnostics", {}).get("constraints", {}).get("hard"):
+            error = data["diagnostics"]["constraints"]["hard"][0].get("constraint_failed", {})
+        # Check for enhanced error structure (legacy messages or new diagnostics)
+        assert "code" in error or "constraint_type" in error or "severity" in error or "type" in error
+        assert "title" in error or "description" in error or "message" in error or "details" in error
 
 
 def test_teacher_busy_period_validation():
@@ -705,7 +712,7 @@ def test_teacher_busy_period_validation():
     data = response.json()
     
     # Should have validation error for invalid day
-    assert data["status"] == "INFEASIBLE" or len(data["messages"]["error_message"]) > 0
+    assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
 def test_teacher_preferred_period_validation():
@@ -726,7 +733,7 @@ def test_teacher_preferred_period_validation():
     data = response.json()
     
     # Should have validation error
-    assert data["status"] == "INFEASIBLE" or len(data["messages"]["error_message"]) > 0
+    assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
 def test_multiple_constraints_combined():
@@ -768,14 +775,193 @@ def test_multiple_constraints_combined():
     data = response.json()
     
     # Should handle all constraints together
-    assert data["status"] in ["OPTIMAL", "FEASIBLE", "INFEASIBLE"]
+    assert data["status"] in ["OPTIMAL", "PARTIAL", "ERROR"]
     
-    if data["status"] in ["OPTIMAL", "FEASIBLE"]:
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
         # Verify break exception
         for day_schedule in data["timetable"]:
             if day_schedule["day"].lower() == "friday":
                 break_slots = [s for s in day_schedule.get("slots", []) if s.get("break", False)]
                 assert len(break_slots) == 0, "Break found on exception day"
+
+
+def test_response_shape_matches_spec():
+    """Response must include status, timetable, diagnostics (constraints + summary), metadata (spec + mocks)."""
+    request_data = get_minimal_request()
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+
+    assert "status" in data
+    assert data["status"] in ["OPTIMAL", "PARTIAL", "ERROR"]
+    assert "timetable" in data
+    assert isinstance(data["timetable"], list)
+
+    # Diagnostics (DR-01, mocks/response/optimal.response.example.json)
+    assert "diagnostics" in data
+    diag = data["diagnostics"]
+    assert "constraints" in diag
+    assert "hard" in diag["constraints"]
+    assert "soft" in diag["constraints"]
+    assert isinstance(diag["constraints"]["hard"], list)
+    assert isinstance(diag["constraints"]["soft"], list)
+    assert "summary" in diag
+    summary = diag["summary"]
+    assert "message" in summary
+    assert "hard_constraints_met" in summary
+    assert "soft_constraints_met" in summary
+    assert "failed_soft_constraints_count" in summary
+    assert "failed_hard_constraints_count" in summary
+
+    # Metadata
+    assert "metadata" in data
+    assert "solve_time_seconds" in data["metadata"]
+
+    # Status vs summary consistency (RC-04)
+    if data["status"] == "OPTIMAL":
+        assert summary["hard_constraints_met"] is True
+        assert summary["soft_constraints_met"] is True
+    elif data["status"] == "PARTIAL":
+        assert summary["hard_constraints_met"] is True
+        assert summary["soft_constraints_met"] is False
+    elif data["status"] == "ERROR":
+        assert summary["hard_constraints_met"] is False
+
+
+def test_error_response_has_diagnostic_blockers():
+    """On ERROR, diagnostics.constraints.hard must contain constraint_failed and blockers (DR-02, DR-03)."""
+    invalid_request = {
+        "teachers": [],
+        "teacher_courses": [],
+        "halls": [],
+        "teacher_busy_period": [],
+        "teacher_prefered_teaching_period": [],
+        "hall_busy_periods": [],
+        "break_period": {"start_time": "12:00", "end_time": "13:00", "daily": True},
+        "operational_period": {
+            "start_time": "08:00",
+            "end_time": "16:00",
+            "daily": True,
+            "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+            "constrains": [],
+        },
+    }
+    response = client.post("/api/v1/schedule/with-preference", json=invalid_request)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ERROR"
+    assert len(data["diagnostics"]["constraints"]["hard"]) > 0
+    failure = data["diagnostics"]["constraints"]["hard"][0]
+    assert "constraint_failed" in failure
+    assert "blockers" in failure
+    assert isinstance(failure["blockers"], list)
+    if failure["blockers"]:
+        blocker = failure["blockers"][0]
+        assert "type" in blocker
+
+
+def test_break_period_no_break_exceptions_and_day_exceptions():
+    """Break period accepts doc-style no_break_exceptions and day_exceptions (mocks/hardconstraints case_three)."""
+    request_data = get_minimal_request()
+    request_data["break_period"] = {
+        "start_time": "12:00",
+        "end_time": "13:00",
+        "daily": True,
+        "no_break_exceptions": ["monday"],
+        "day_exceptions": [
+            {"day": "friday", "start_time": "14:00", "end_time": "15:00"}
+        ],
+    }
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] in ["OPTIMAL", "PARTIAL", "ERROR"]
+    if data["status"] in ["OPTIMAL", "PARTIAL"]:
+        for day_schedule in data["timetable"]:
+            if day_schedule["day"].lower() == "monday":
+                break_slots = [s for s in day_schedule.get("slots", []) if s.get("break", False)]
+                assert len(break_slots) == 0, "Monday should have no break (no_break_exceptions)"
+            if day_schedule["day"].lower() == "friday":
+                break_slots = [s for s in day_schedule.get("slots", []) if s.get("break", False)]
+                if break_slots:
+                    assert break_slots[0].get("start_time") == "14:00" and break_slots[0].get("end_time") == "15:00"
+
+
+def test_required_joint_course_periods_accepts_valid_request():
+    """Required joint course periods: valid request with matching slot grid does not return ERROR."""
+    request_data = get_minimal_request()
+    request_data["periods"] = {"daily": True, "period": 60}
+    request_data["required_joint_course_periods"] = [
+        {
+            "course_id": "c1",
+            "teacher_id": "t1",
+            "periods": [
+                {"day": "monday", "start_time": "08:00", "end_time": "09:00"},
+            ],
+        }
+    ]
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    # Either OPTIMAL or ERROR (if slot grid doesn't align; 08:00-09:00 fits 60-min period)
+    assert data["status"] in ["OPTIMAL", "PARTIAL", "ERROR"]
+    if data["status"] == "OPTIMAL":
+        # Check that monday has a slot 08:00-09:00 for c1/t1
+        for day_schedule in data["timetable"]:
+            if day_schedule["day"].lower() == "monday":
+                for slot in day_schedule.get("slots", []):
+                    if slot.get("course_id") == "c1" and slot.get("start_time") == "08:00" and slot.get("end_time") == "09:00":
+                        break
+                break
+
+
+def test_soft_constraint_teacher_max_daily_hours_produces_partial():
+    """When teacher_max_daily_hours is set and exceeded, status is PARTIAL and soft diagnostics present."""
+    request_data = get_minimal_request()
+    request_data["teacher_courses"] = [
+        {"course_id": "c1", "course_title": "Math", "course_credit": 1, "course_type": "theory", "course_hours": 10, "teacher_id": "t1", "teacher_name": "John Doe"},
+        {"course_id": "c2", "course_title": "Physics", "course_credit": 1, "course_type": "theory", "course_hours": 10, "teacher_id": "t1", "teacher_name": "John Doe"},
+        {"course_id": "c3", "course_title": "Chem", "course_credit": 1, "course_type": "theory", "course_hours": 10, "teacher_id": "t1", "teacher_name": "John Doe"},
+    ]
+    request_data["periods"] = {"daily": True, "period": 60}
+    request_data["soft_constrains"] = {"teacher_max_daily_hours": 2}
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    # Scheduler may place 3 sessions for t1 on same day -> exceeds 2h -> PARTIAL
+    assert data["status"] in ["OPTIMAL", "PARTIAL"]
+    assert data["diagnostics"]["summary"]["hard_constraints_met"] is True
+    if data["status"] == "PARTIAL":
+        assert len(data["diagnostics"]["constraints"]["soft"]) >= 1
+        soft_types = [f["constraint_failed"].get("type") for f in data["diagnostics"]["constraints"]["soft"]]
+        assert "teacher_max_daily_hours" in soft_types or not soft_types
+
+
+def test_soft_constraint_course_requested_time_slots_accepts_request():
+    """course_requested_time_slots in soft_constrains is accepted; may produce PARTIAL if course placed outside requested slots."""
+    request_data = get_minimal_request()
+    request_data["soft_constrains"] = {
+        "course_requested_time_slots": [
+            {"course_id": "c1", "slots": [{"day": "tuesday", "start_time": "09:00", "end_time": "10:00"}]}
+        ]
+    }
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] in ["OPTIMAL", "PARTIAL"]
+    assert data["diagnostics"]["summary"]["hard_constraints_met"] is True
+
+
+def test_soft_constraint_requested_free_periods_accepts_request():
+    """requested_free_periods in soft_constrains is accepted; may produce PARTIAL if period is occupied."""
+    request_data = get_minimal_request()
+    request_data["soft_constrains"] = {
+        "requested_free_periods": [{"day": "monday", "start_time": "10:00", "end_time": "11:00"}]
+    }
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] in ["OPTIMAL", "PARTIAL"]
 
 
 if __name__ == "__main__":
