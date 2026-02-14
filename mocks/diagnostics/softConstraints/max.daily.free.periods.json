@@ -3,48 +3,75 @@
     "type": "schedule_max_free_periods_per_day",
     "details": {
       "max_free_periods": 1,
-      "daily": true
+      "day": "monday"
     }
   },
   "blockers": [
     {
-      "type": "max_course_frequency_per_day",
+      "type": "OPERATIONAL_PERIOD_VIOLATION",
       "entity": {
-        "type": "course",
-        "id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
-        "name": "Calculus I"
-      },
-      "conflict": {
-        "day": "Monday",
-        "current_frequency": 2,
-        "max_allowed": 1
-      },
-      "evidence": {
-        "conflict_slots": [
+        "type": "operational_period",
+        "slots": [
           {
-            "day": "Monday",
-            "start_time": "10:00",
-            "end_time": "11:00",
-            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c"
+            "day": "monday",
+            "start_time": "08:00",
+            "end_time": "15:00"
           },
           {
-            "day": "Monday",
-            "start_time": "14:00",
-            "end_time": "15:00",
-            "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c"
+            "day": "tuesday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          },
+          {
+            "day": "wednesday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          },
+          {
+            "day": "thursday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          },
+          {
+            "day": "friday",
+            "start_time": "08:00",
+            "end_time": "17:00"
           }
         ]
+      },
+      "conflict": {
+        "requested_slot": {
+          "start_time": "07:00",
+          "end_time": "07:30",
+          "day": "monday"
+        }
+      },
+      "evidence": {
+        "day": "monday",
+        "start_time": "08:00",
+        "end_time": "15:00"
       }
     }
   ],
   "suggestions": [
     {
-      "action": "EXTEND_OPERATIONAL_HOURS",
-      "suggested_close_time": "13:00"
+      "constraint": "schedule_max_free_periods_per_day",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "max_free_periods":2
+        }
+      ]
     },
     {
-      "action": "REDUCE_SESSION_COUNT",
-      "recommended_move_course_id": "bcde-f1e2d3c4-a1b2c3d4-e5f6-b5a6"
+      "constraint": "operational_period",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "start_time": "07:00",
+          "end_time": "17:00"
+        }
+      ]
     }
   ]
 }

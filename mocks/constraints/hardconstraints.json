@@ -67,7 +67,7 @@
                     "duration_minutes": 90,
                     "day_exceptions": [
                         {
-                            "day": "Tuesday",
+                            "day": "tuesday",
                             "duration_minutes": 120
                         }
                     ]
@@ -82,12 +82,12 @@
                     "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                     "periods": [
                         {
-                            "day": "Monday",
+                            "day": "monday",
                             "start_time": "10:00",
                             "end_time": "11:00"
                         },
                         {
-                            "day": "Wednesday",
+                            "day": "wednesday",
                             "start_time": "14:00",
                             "end_time": "15:00"
                         }

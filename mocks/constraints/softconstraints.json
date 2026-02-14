@@ -47,7 +47,7 @@
                     "max_periods": 5,
                     "day_exceptions": [
                         {
-                            "day": "Monday",
+                            "day": "monday",
                             "max_periods": 7
                         }
                     ]
@@ -65,7 +65,7 @@
                     "max_free_periods": 1,
                     "day_exceptions": [
                         {
-                            "day": "Monday",
+                            "day": "monday",
                             "max_free_periods": 3
                         }
                     ]
@@ -99,12 +99,12 @@
                         "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
                         "slots": [
                             {
-                                "day": "Monday",
+                                "day": "monday",
                                 "start_time": "09:00",
                                 "end_time": "10:30"
                             },
                             {
-                                "day": "Wednesday",
+                                "day": "wednesday",
                                 "start_time": "14:00",
                                 "end_time": "15:30"
                             }
@@ -116,10 +116,10 @@
                         "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
                         "slots": [
                             {
-                                "day": "Monday"
+                                "day": "monday"
                             },
                             {
-                                "day": "Wednesday",
+                                "day": "wednesday",
                                 "start_time": "14:00",
                                 "end_time": "15:30"
                             }
@@ -148,7 +148,7 @@
                         "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
                         "teacher_id": "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
                         "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
-                        "day": "Monday",
+                        "day": "monday",
                         "start_time": "09:00",
                         "end_time": "10:30"
                     },
@@ -156,7 +156,7 @@
                         "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
                         "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
                         "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
-                        "day": "Tuesday",
+                        "day": "tuesday",
                         "start_time": "11:00",
                         "end_time": "12:30"
                     }
@@ -166,13 +166,13 @@
                         "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
                         "teacher_id": "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
                         "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
-                        "day": "Monday"
+                        "day": "monday"
                     },
                     {
                         "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
                         "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
                         "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
-                        "day": "Tuesday",
+                        "day": "tuesday",
                         "start_time": "11:00",
                         "end_time": "12:30"
                     }
@@ -197,12 +197,12 @@
                         "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
                         "windows": [
                             {
-                                "day": "Monday",
+                                "day": "monday",
                                 "start_time": "08:00",
                                 "end_time": "18:00"
                             },
                             {
-                                "day": "Tuesday",
+                                "day": "tuesday",
                                 "start_time": "08:00",
                                 "end_time": "18:00"
                             }
@@ -214,10 +214,10 @@
                         "hall_id": "h1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
                         "windows": [
                             {
-                                "day": "Monday"
+                                "day": "monday"
                             },
                             {
-                                "day": "Tuesday",
+                                "day": "tuesday",
                                 "start_time": "08:00",
                                 "end_time": "18:00"
                             }
@@ -246,12 +246,12 @@
                         "teacher_id": "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
                         "windows": [
                             {
-                                "day": "Monday",
+                                "day": "monday",
                                 "start_time": "08:00",
                                 "end_time": "12:00"
                             },
                             {
-                                "day": "Wednesday",
+                                "day": "wednesday",
                                 "start_time": "13:00",
                                 "end_time": "17:00"
                             }
@@ -263,7 +263,7 @@
                         "teacher_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
                         "windows": [
                             {
-                                "day":"Monday"
+                                "day":"monday"
                             }
                         ]
                     }
@@ -287,22 +287,22 @@
             "examples": {
                 "case_one": [
                     {
-                        "day": "Monday",
+                        "day": "monday",
                         "start_time": "10:00",
                         "end_time": "11:00"
                     },
                     {
-                        "day": "Friday",
+                        "day": "friday",
                         "start_time": "10:00",
                         "end_time": "11:00"
                     }
                 ],
                 "case_two": [
                     {
-                        "day": "Monday"
+                        "day": "monday"
                     },
                     {
-                        "day": "Friday",
+                        "day": "friday",
                         "start_time": "10:00",
                         "end_time": "11:00"
                     }

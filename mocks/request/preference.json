@@ -4,19 +4,19 @@
             "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "start_time": "08:00",
             "end_time": "11:00",
-            "day": "Monday"
+            "day": "monday"
         },
         {
             "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "start_time": "14:00",
             "end_time": "17:00",
-            "day": "Wednesday"
+            "day": "wednesday"
         },
         {
             "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
             "start_time": "09:00",
             "end_time": "12:00",
-            "day": "Tuesday"
+            "day": "tuesday"
         }
     ],
     "teachers": [
@@ -34,13 +34,13 @@
             "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "start_time": "11:00",
             "end_time": "13:00",
-            "day": "Monday"
+            "day": "monday"
         },
         {
             "teacher_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
             "start_time": "13:00",
             "end_time": "15:00",
-            "day": "Tuesday"
+            "day": "tuesday"
         }
     ],
     "teacher_courses": [
@@ -116,21 +116,21 @@
             "hall_name": "Main Lecture Hall A",
             "start_time": "10:00",
             "end_time": "12:00",
-            "day": "Monday"
+            "day": "monday"
         },
         {
             "hall_id": "h2b3c4d5-e6f7-8901-bcde-f12345678901",
             "hall_name": "Advanced Computing Lab",
             "start_time": "14:00",
             "end_time": "16:00",
-            "day": "Wednesday"
+            "day": "wednesday"
         },
         {
             "hall_id": "h3c4d5e6-f7a8-9012-cdef-g12345678902",
             "hall_name": "Grand Amphitheater",
             "start_time": "09:00",
             "end_time": "11:00",
-            "day": "Friday"
+            "day": "friday"
         }
     ],
     "hard_constraints": {
@@ -139,12 +139,12 @@
             "end_time": "12:30",
             "day_exceptions": [
                 {
-                    "day": "Monday",
+                    "day": "monday",
                     "start_time": "12:30",
                     "end_time": "13:00"
                 },
                 {
-                    "day": "Wednesday",
+                    "day": "wednesday",
                     "start_time": "12:30",
                     "end_time": "13:00"
                 }
@@ -158,12 +158,12 @@
             "end_time": "18:00",
             "day_exceptions": [
                 {
-                    "day": "Monday",
+                    "day": "monday",
                     "start_time": "09:00",
                     "end_time": "17:00"
                 },
                 {
-                    "day": "Wednesday",
+                    "day": "wednesday",
                     "start_time": "09:00",
                     "end_time": "17:00"
                 }
@@ -176,11 +176,11 @@
             "duration_minutes": 60,
             "day_exceptions": [
                 {
-                    "day": "Tuesday",
+                    "day": "tuesday",
                     "duration_minutes": 90
                 },
                 {
-                    "day": "Thursday",
+                    "day": "thursday",
                     "duration_minutes": 90
                 }
             ]

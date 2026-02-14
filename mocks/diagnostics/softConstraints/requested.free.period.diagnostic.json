@@ -1,0 +1,60 @@
+{
+    "constraint_failed": {
+        "type": "requested_free_periods",
+        "details": {
+            "day": "monday",
+            "start_time": "11:00",
+            "end_time": "12:30"
+        }
+    },
+    "blockers": [
+        {
+            "type": "BREAK_PERIOD_VIOLATION",
+            "conflict": {
+                "requested_slot": {
+                    "day": "monday",
+                    "start_time": "07:00",
+                    "end_time": "07:30"
+                }
+            },
+            "evidence": {
+                "break_periods": [
+                    {
+                        "day": "monday",
+                        "start_time": "07:00",
+                        "end_time": "08:00"
+                    }
+                ]
+            }
+        }
+    ],
+    "suggestions": [
+        {
+            "constraint": "teacher_max_weekly_hours",
+            "suggested_changes": [
+                {
+                    "max_hours": 22
+                }
+            ]
+        },
+        {
+            "constraint": "teacher_max_daily_hours",
+            "suggested_changes": [
+                {
+                    "day": "monday",
+                    "max_hours": 6
+                }
+            ]
+        },
+        {
+            "constraint": "operational_period",
+            "suggested_changes": [
+                {
+                    "day": "monday",
+                    "start_time": "07:00",
+                    "end_time": "17:00"
+                }
+            ]
+        }
+    ]
+}

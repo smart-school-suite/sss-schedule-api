@@ -1,11 +1,11 @@
 {
   "constraint_failed": {
     "type": "teacher_max_daily_hours",
-    "rule": {
-      "max_daily_hours": 4
+    "details":{
+       "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+       "max_hours":4
     }
   },
-  "total_blockers": 2,
   "blockers": [
     {
       "type": "TEACHER_MAX_DAILY_HOURS_EXCEEDED",
@@ -90,19 +90,19 @@
             }
           },
           {
-            "type":"TEACHER_UNAVAILABLE",
+            "type": "TEACHER_UNAVAILABLE",
             "entity": {
-              "id":"c1d2e3f4-5678-90ab-cdef-1234567890ab",
-              "name":"Dr. Emily Clark"
+              "id": "c1d2e3f4-5678-90ab-cdef-1234567890ab",
+              "name": "Dr. Emily Clark"
             },
-            "conflict":{
-                "attempted_slots":[
-                  {
-                     "day":"Thursday",
-                     "start_time":"09:00",
-                     "end_time":"12:00"
-                  }
-                ]
+            "conflict": {
+              "attempted_slots": [
+                {
+                  "day": "Thursday",
+                  "start_time": "09:00",
+                  "end_time": "12:00"
+                }
+              ]
             },
             "evidence": {
               "unavailable_slots": [
@@ -120,12 +120,23 @@
   ],
   "suggestions": [
     {
-      "parameter": "teacher_max_daily_hours",
-      "proposed_value": 6
+      "constraint": "teacher_max_daily_hours",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "max_hours": 6
+        }
+      ]
     },
     {
-      "parameter": "teacher_count",
-      "proposed_value": 3
+      "constraint": "operational_period",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "start_time": "07:00",
+          "end_time": "17:00"
+        }
+      ]
     }
   ]
 }

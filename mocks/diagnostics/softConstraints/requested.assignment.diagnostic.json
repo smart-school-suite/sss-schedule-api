@@ -7,7 +7,7 @@
       "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
       "start_time": "10:00",
       "end_time": "12:00",
-      "day": "Monday"
+      "day": "monday"
     }
   },
   "blockers": [
@@ -19,7 +19,7 @@
         "name": "Main Lecture Hall"
       },
       "conflict": {
-        "day": "Monday",
+        "day": "monday",
         "start_time": "10:00",
         "end_time": "12:00"
       },
@@ -28,7 +28,7 @@
           {
             "course_id": "z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4",
             "teacher_id": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
-            "day": "Monday",
+            "day": "monday",
             "start_time": "10:00",
             "end_time": "12:00"
           }
@@ -43,14 +43,14 @@
         "name": "Dr. John Doe"
       },
       "conflict": {
-        "day": "Monday",
+        "day": "monday",
         "start_time": "10:00",
         "end_time": "12:00"
       },
       "evidence": {
         "teacher_preferred_slots": [
           {
-            "day": "Monday",
+            "day": "monday",
             "start_time": "10:00",
             "end_time": "12:00"
           }
@@ -65,7 +65,7 @@
         "name": "Dr. John Doe"
       },
       "conflict": {
-        "day": "Monday",
+        "day": "monday",
         "start_time": "10:00",
         "end_time": "12:00"
       },
@@ -74,7 +74,7 @@
           {
             "course_id": "m1n2b3v4-c5x6-z7a8-s9d0-f1g2h3j4k5l6",
             "hall_id": "p0o9i8u7-y6t5-r4e3-w2q1-z0x9c8v7b6n5",
-            "day": "Monday",
+            "day": "monday",
             "start_time": "10:00",
             "end_time": "12:00"
           }
@@ -107,12 +107,12 @@
       "type": "BREAK_PERIOD_VIOLATION",
       "entity": {
         "type": "break",
-        "day": "Monday",
+        "day": "monday",
         "start_time": "10:00",
         "end_time": "12:00"
       },
       "conflict": {
-        "day": "Friday",
+        "day": "friday",
         "start_time": "10:00",
         "end_time": "12:00"
       },
@@ -127,14 +127,14 @@
       "type": "OPERATIONAL_HOURS_VIOLATION",
       "entity": {
         "type": "operational_hours",
-        "day": "Monday",
+        "day": "monday",
         "start_time": "07:00",
         "end_time": "12:00"
       },
       "conflict": {
         "start_time": "10:00",
         "end_time": "12:00",
-        "day": "Monday"
+        "day": "monday"
       },
       "evidence": {
         "operational_hours": {
@@ -147,11 +147,11 @@
       "type": "PERIOD_DURATION_VIOLATION",
       "entity": {
         "type": "period_duration",
-        "day": "Monday",
+        "day": "monday",
         "period_duration_minutes": 60
       },
       "conflict": {
-        "day": "Monday",
+        "day": "monday",
         "start_time": "10:00",
         "end_time": "12:00"
       },
@@ -171,26 +171,26 @@
       },
       "conflict": {
         "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-        "day": "Monday",
+        "day": "monday",
         "current_frequency": 3
       },
       "evidence": {
         "course_schedule": [
           {
             "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-            "day": "Monday",
+            "day": "monday",
             "start_time": "08:00",
             "end_time": "09:30"
           },
           {
             "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-            "day": "Monday",
+            "day": "monday",
             "start_time": "10:00",
             "end_time": "11:30"
           },
           {
             "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
-            "day": "Monday",
+            "day": "monday",
             "start_time": "13:00",
             "end_time": "14:30"
           }
@@ -333,11 +333,10 @@
             "type": "HALL_BUSY",
             "entity": {
               "type": "HALL",
-              "id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
-              "name": "Main Lecture Hall"
+              "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6"
             },
             "conflict": {
-              "day": "Monday",
+              "day": "monday",
               "start_time": "10:00",
               "end_time": "12:00"
             },
@@ -346,7 +345,7 @@
                 {
                   "course_id": "z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4",
                   "teacher_id": "q1w2e3r4-t5y6-u7i8-o9p0-a1s2d3f4g5h6",
-                  "day": "Monday",
+                  "day": "monday",
                   "start_time": "10:00",
                   "end_time": "12:00"
                 }
@@ -355,6 +354,35 @@
           }
         ]
       }
+    }
+  ],
+  "suggestions": [
+    {
+      "constraint": "teacher_max_weekly_hours",
+      "suggested_changes": [
+        {
+          "max_hours": 22
+        }
+      ]
+    },
+    {
+      "constraint": "teacher_max_daily_hours",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "max_hours": 6
+        }
+      ]
+    },
+    {
+      "constraint": "operational_period",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "start_time": "07:00",
+          "end_time": "17:00"
+        }
+      ]
     }
   ]
 }

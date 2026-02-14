@@ -3,21 +3,9 @@
     "type": "course_requested_time_slots",
     "details": {
       "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
-      "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
-      "fixed_slots": [
-        {
-          "start_time": "10:00",
-          "end_time": "11:00"
-        },
-        {
-          "start_time": "10:00",
-          "end_time": "11:00",
-          "day": "Wednesday"
-        },
-        {
-          "day": "Friday"
-        }
-      ]
+      "day": "friday",
+      "start_time": "09:00",
+      "end_time": "11:00"
     },
     "blockers": [
       {
@@ -230,6 +218,27 @@
             }
           ]
         }
+      }
+    ],
+    "suggestions": [
+      {
+        "constraint": "schedule_max_free_periods_per_day",
+        "suggested_changes": [
+          {
+            "day": "monday",
+            "max_free_periods": 2
+          }
+        ]
+      },
+      {
+        "constraint": "operational_period",
+        "suggested_changes": [
+          {
+            "day": "monday",
+            "start_time": "07:00",
+            "end_time": "17:00"
+          }
+        ]
       }
     ]
   }

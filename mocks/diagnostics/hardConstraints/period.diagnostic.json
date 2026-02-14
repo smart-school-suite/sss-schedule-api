@@ -57,13 +57,20 @@
     ],
     "suggestions": [
       {
-        "action": "MODIFY_OPERATIONAL_CALENDAR",
-        "description": "Extend school hours to include the 12:00 - 12:30 window for the affected days.",
+        "constraint": "period_duration_minutes",
         "suggested_changes": [
           {
-            "day": "Monday",
-            "new_start_time": "12:00",
-            "new_end_time": "17:30"
+            "duration_minutes": 30
+          }
+        ]
+      },
+      {
+        "constraint": "operational_period",
+        "suggested_changes": [
+          {
+            "day": "monday",
+            "start_time": "07:00",
+            "end_time": "17:00"
           }
         ]
       }

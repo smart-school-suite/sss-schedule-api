@@ -2,7 +2,8 @@
   "constraint_failed": {
     "type": "teacher_max_weekly_hours",
     "details": {
-      "max_weekly_hours": 20
+      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "max_hours": 20
     }
   },
   "blockers": [
@@ -10,13 +11,11 @@
       "type": "TEACHER_MAX_WEEKLY_HOURS_EXCEEDED",
       "entity": {
         "type": "TEACHER",
-        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-        "name": "Dr. John Doe"
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
       },
       "conflict": {
-        "max_allowed_hours": 4,
-        "actual_hours": 6,
-        "excess": 2
+        "max_hours": 4,
+        "current_hours": 6
       },
       "evidence": {
         "booked_slots": [
@@ -44,12 +43,12 @@
           {
             "type": "TEACHER_MAX_DAILY_HOURS_EXCEEDED",
             "entity": {
-              "id": "a2b3c4d5-e6f7-g8h9-i0j1-k2l3m4n5o6p7",
-              "name": "Dr. Jane Smith"
+              "type": "TEACHER",
+              "teacher_id": "a2b3c4d5-e6f7-g8h9-i0j1-k2l3m4n5o6p7"
             },
             "conflict": {
-              "max_allowed_hours": 4,
-              "current_booked_hours": 5
+              "max_hours": 4,
+              "current_hours": 6
             },
             "evidence": {
               "booked_slots": [
@@ -119,14 +118,22 @@
   ],
   "suggestions": [
     {
-      "action": "INCREASE_MAX_WEEKLY_HOURS",
-      "recommended_value": 22,
-      "impact": "Resolves current schedule but may cause fatigue"
+      "constraint": "teacher_max_weekly_hours",
+      "suggested_changes": [
+        {
+          "max_hours": 22
+        }
+      ]
     },
     {
-      "action": "ALLOCATE_ADDITIONAL_STAFF",
-      "required_teacher_count": 3,
-      "message": "Add at least 2 more qualified teachers for this department to stay within 4-hour limits"
+      "constraint": "operational_period",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "start_time": "07:00",
+          "end_time": "17:00"
+        }
+      ]
     }
   ]
 }

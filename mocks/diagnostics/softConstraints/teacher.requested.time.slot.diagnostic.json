@@ -3,80 +3,81 @@
     "type": "teacher_requested_time_windows",
     "details": {
       "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-      "teacher_name": "Dr. John Doe",
-      "windows": [
-        {
-          "day": "Monday",
-          "start_time": "09:00",
-          "end_time": "11:00"
-        }
-      ]
+      "day": "monday",
+      "start_time": "08:00",
+      "end_time": "08:20"
     }
   },
   "blockers": [
     {
-      "type": "TEACHER_UNAVAILABLE",
-      "teacher_details": [
-        {
-          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-          "teacher_name": "Dr. John Doe",
-          "busy_slots": [
-            {
-              "start_time": "10:00",
-              "end_time": "12:00",
-              "day": "Monday"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "type": "TEACHER_BUSY",
-      "teacher_busy_details": [
-        {
-          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-          "teacher_name": "Dr. John Doe",
-          "busy_slots": [
-            {
-              "start_time": "10:00",
-              "end_time": "12:00",
-              "day": "Monday"
-            }
-          ]
-        }
-      ]
+      "entity": {
+        "type": "teacher",
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      },
+      "conflict": {
+        "day": "monday",
+        "start_time": "08:00",
+        "end_time": "08:20"
+      },
+      "evidence": {
+        "existing_bookings": [
+          {
+            "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "day": "monday",
+            "start_time": "08:00",
+            "end_time": "09:00"
+          }
+        ]
+      }
     },
     {
       "type": "TEACHER_UNAVAILABLE",
-      "teacher_time_preferences": [
-        {
-          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-          "teacher_name": "Dr. John Doe",
-          "avaliable_slots": [
-            {
-              "start_time": "08:00",
-              "end_time": "10:00",
-              "day": "Monday"
-            }
-          ]
-        }
-      ]
+      "entity": {
+        "type": "teacher",
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      },
+      "conflict": {
+        "day": "monday",
+        "start_time": "08:00",
+        "end_time": "08:20"
+      },
+      "evidence": {
+        "teacher_preferred_slots": [
+          {
+            "day": "monday",
+            "start_time": "08:00",
+            "end_time": "08:20"
+          }
+        ]
+      }
     }
   ],
   "suggestions": [
     {
-      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-      "teacher_name": "Dr. John Doe",
-      "suggested_time_slots": [
+      "constraint": "teacher_max_weekly_hours",
+      "suggested_changes": [
         {
-          "day": "Monday",
-          "start_time": "08:00",
-          "end_time": "10:00"
-        },
+          "max_hours": 22
+        }
+      ]
+    },
+    {
+      "constraint": "teacher_max_daily_hours",
+      "suggested_changes": [
         {
-          "day": "Tuesday",
-          "start_time": "09:00",
-          "end_time": "11:00"
+          "day": "monday",
+          "max_hours": 6
+        }
+      ]
+    },
+    {
+      "constraint": "operational_period",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "start_time": "07:00",
+          "end_time": "17:00"
         }
       ]
     }
