@@ -125,8 +125,9 @@ class ORToolsScheduler:
             for day in self.days:
                 self.operational_hours[day] = (op_period.start_time, op_period.end_time)
         
-        # Apply per-day overrides
-        for constraint in op_period.constrains:
+        # Apply per-day overrides (doc: day_exceptions; legacy: constrains)
+        overrides = getattr(op_period, "day_exceptions", None) or op_period.constrains
+        for constraint in overrides or []:
             day = constraint.day.lower()
             if day in self.days:
                 self.operational_hours[day] = (constraint.start_time, constraint.end_time)
@@ -174,29 +175,33 @@ class ORToolsScheduler:
     def _get_period_duration(self, day: str) -> int:
         """
         Get period duration in minutes for a specific day.
-        
-        Logic:
-        1. If periods config exists and day has fixed period, use that
-        2. If periods config exists and daily is true, use default period
-        3. Otherwise, default to 30 minutes
+        Doc names: duration_minutes (default), day_exceptions (per-day). Legacy: period, daysFixedPeriods.
         """
         if not self.request.periods:
             return 30  # Default 30 minutes
-        
+
         periods_config = self.request.periods
-        
-        # Check for fixed period on this specific day
+        default_minutes = getattr(periods_config, "duration_minutes", None)
+        if default_minutes is None:
+            default_minutes = periods_config.period
+
+        # Per-day overrides: doc day_exceptions (top-level or under constrains) then legacy daysFixedPeriods
+        day_exc = getattr(periods_config, "day_exceptions", None) or (
+            getattr(periods_config.constrains, "day_exceptions", None) if periods_config.constrains else None
+        )
+        if day_exc:
+            for ex in day_exc:
+                ex_day = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+                if str(ex_day).lower() == day:
+                    return int(getattr(ex, "duration_minutes", ex.get("duration_minutes", default_minutes)))
         if periods_config.constrains and periods_config.constrains.daysFixedPeriods:
             for fixed_period in periods_config.constrains.daysFixedPeriods:
                 if fixed_period.day.lower() == day:
                     return fixed_period.period
-        
-        # Use default period if daily is true
+
         use_daily = self._parse_bool(periods_config.daily)
         if use_daily:
-            return periods_config.period
-        
-        # Fallback to default
+            return default_minutes
         return 30
     
     def _validate_input(self) -> List[str]:
@@ -242,7 +247,10 @@ class ORToolsScheduler:
         
         # Validate teacher preferred periods
         errors.extend(self._validate_teacher_preferred_periods())
-        
+
+        # Validate hall busy periods (optional day)
+        errors.extend(self._validate_hall_busy_periods())
+
         return errors
     
     def _validate_break_period(self) -> List[str]:
@@ -295,30 +303,54 @@ class ORToolsScheduler:
         return errors
     
     def _validate_periods(self) -> List[str]:
-        """Validate periods configuration."""
+        """Validate periods configuration (period/duration_minutes, constrains/day_exceptions)."""
         errors = []
         periods_config = self.request.periods
-        
-        if periods_config.period <= 0:
-            errors.append("Period duration must be greater than 0 minutes")
-        
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+
+        default_dur = getattr(periods_config, "duration_minutes", None)
+        if default_dur is None:
+            default_dur = periods_config.period
+        if default_dur <= 0:
+            errors.append("Period duration (period or duration_minutes) must be greater than 0 minutes")
+
+        for ex in getattr(periods_config, "day_exceptions", None) or []:
+            d = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+            if str(d).lower() not in valid_days:
+                errors.append(f"Invalid day in periods day_exceptions")
+            dm = getattr(ex, "duration_minutes", ex.get("duration_minutes", 0))
+            if dm <= 0:
+                errors.append(f"Period duration_minutes for day must be greater than 0")
+
         if periods_config.constrains:
-            valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
-            
-            # Validate days_exception
             for day in periods_config.constrains.daysException:
                 if day.lower() not in valid_days:
                     errors.append(f"Invalid day '{day}' in periods days_exception")
-            
-            # Validate days_fixed_periods
             for fixed_period in periods_config.constrains.daysFixedPeriods:
                 if fixed_period.day.lower() not in valid_days:
                     errors.append(f"Invalid day '{fixed_period.day}' in days_fixed_periods")
                 if fixed_period.period <= 0:
                     errors.append(f"Period duration for {fixed_period.day} must be greater than 0 minutes")
-        
+            for ex in getattr(periods_config.constrains, "day_exceptions", None) or []:
+                d = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+                if str(d).lower() not in valid_days:
+                    errors.append("Invalid day in periods.constrains.day_exceptions")
+                dm = getattr(ex, "duration_minutes", ex.get("duration_minutes", 0))
+                if dm <= 0:
+                    errors.append("Period duration_minutes in day_exceptions must be greater than 0")
+
         return errors
     
+    def _validate_hall_busy_periods(self) -> List[str]:
+        """Validate hall busy periods (optional day must be valid if present)."""
+        errors = []
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+        for busy in self.request.hall_busy_periods:
+            day = getattr(busy, "day", None)
+            if day is not None and str(day).lower() not in valid_days:
+                errors.append(f"Invalid day '{day}' in hall_busy_periods for hall {busy.hall_id}")
+        return errors
+
     def _validate_teacher_busy_periods(self) -> List[str]:
         """Validate teacher busy periods."""
         errors = []
@@ -749,15 +781,17 @@ class ORToolsScheduler:
                     if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
                         return False
         
-        # 2. Check hall busy periods
+        # 2. Check hall busy periods (optional day: if set, only block on that day)
         for busy_period in self.request.hall_busy_periods:
-            if busy_period.hall_id == hall.hall_id:
-                # Note: hall_busy_periods don't have day field in schema, 
-                # but we check if time overlaps (assuming same day)
-                busy_start = self._parse_time(busy_period.start_time)
-                busy_end = self._parse_time(busy_period.end_time)
-                if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
-                    return False
+            if busy_period.hall_id != hall.hall_id:
+                continue
+            busy_day = getattr(busy_period, "day", None)
+            if busy_day is not None and str(busy_day).lower() != day:
+                continue
+            busy_start = self._parse_time(busy_period.start_time)
+            busy_end = self._parse_time(busy_period.end_time)
+            if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
+                return False
         
         # 3. Check break periods
         if self._is_slot_in_break_period(day, slot_start, slot_end):

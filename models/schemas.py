@@ -55,11 +55,12 @@ class Hall(BaseModel):
 
 
 class HallBusyPeriod(BaseModel):
-    """Times when hall is unavailable"""
+    """Times when hall is unavailable (optionally per-day)."""
     hall_id: str
     hall_name: Optional[str] = ""
     start_time: str  # HH:MM format
     end_time: str
+    day: Optional[str] = None  # If set, only this day is blocked; if omitted, applies to all days
 
 
 # ===========================
@@ -103,12 +104,13 @@ class OperationalConstraint(BaseModel):
 
 
 class OperationalPeriod(BaseModel):
-    """Institution working hours configuration"""
+    """Institution working hours configuration. Doc: day_exceptions = per-day overrides."""
     start_time: str
     end_time: str
     daily: Union[bool, str]  # Can be boolean or string "boolean"
     days: List[str]  # Active days of week
-    constrains: List[OperationalConstraint] = []  # Per-day overrides
+    constrains: List[OperationalConstraint] = []  # Per-day overrides (legacy)
+    day_exceptions: Optional[List[OperationalConstraint]] = None  # Doc name: same as constrains
 
 
 # ===========================
@@ -121,17 +123,26 @@ class DayFixedPeriod(BaseModel):
     period: int  # Duration in minutes
 
 
+class PeriodDayException(BaseModel):
+    """Doc name: per-day duration override (day_exceptions[].duration_minutes)."""
+    day: str
+    duration_minutes: int
+
+
 class PeriodConstraints(BaseModel):
     """Period duration exceptions and overrides"""
     daysException: List[str] = []  # Days to skip default period
     daysFixedPeriods: List[DayFixedPeriod] = []  # Custom periods per day
+    day_exceptions: Optional[List[PeriodDayException]] = None  # Doc name: same idea as daysFixedPeriods
 
 
 class Periods(BaseModel):
-    """Configurable slot duration configuration"""
+    """Configurable slot duration configuration. Doc: duration_minutes = default, day_exceptions = per-day."""
     daily: Union[bool, str] = True  # If true, apply uniform period to all days
-    period: int = 30  # Default duration in minutes
+    period: int = 30  # Default duration in minutes (legacy)
+    duration_minutes: Optional[int] = None  # Doc name: same as period
     constrains: Optional[PeriodConstraints] = None
+    day_exceptions: Optional[List[PeriodDayException]] = None  # Doc name: per-day duration overrides
 
 
 # ===========================
