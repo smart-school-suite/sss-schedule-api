@@ -19,6 +19,10 @@
         {
             "teacher_id": "0f16fdce-d648-486a-8691-f6439eda3f0e",
             "name": "Annamarie Murray"
+        },
+        {
+            "teacher_id": "219c60e4-89fe-47d7-92fa-7bbbd343c539",
+            "name": "Dr Roland"
         }
     ],
     "teacher_busy_period": [

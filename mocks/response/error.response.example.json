@@ -1,65 +1,58 @@
 {
   "status": "ERROR",
-  "timetable": {
-    "timetable": [
-      {
-        "day": "Saturday",
-        "slots": [
-          {
-            "day": "Saturday",
-            "start_time": "09:00",
-            "end_time": "10:30",
-            "break": false,
-            "duration": "1hr30min",
-            "teacher_id": "cccceeee-ffff-0000-1111-222233334444",
-            "teacher_name": "Mr. O'Neil",
-            "course_id": "55667788-99aa-bbcc-ddee-ff0011223344",
-            "course_name": "Human-Computer Interaction",
-            "hall_id": "40404040-5050-6060-7070-808080808080",
-            "hall_name": "Design Studio"
+  "timetable": [],
+  "diagnostics": {
+    "constraints": {
+      "hard": [
+        {
+          "constraint_failed": {
+            "type": "OPERATIONAL_PERIOD_VIOLATION",
+            "details": {
+              "message": "Insufficient operational hours to accommodate all required course sessions"
+            }
           },
-          {
-            "day": "Saturday",
-            "start_time": "10:30",
-            "end_time": "11:30",
-            "break": true,
-            "duration": null
-          },
-          {
-            "day": "Saturday",
-            "start_time": "11:30",
-            "end_time": "13:00",
-            "break": false,
-            "duration": "1hr30min",
-            "teacher_id": "ddddeeee-ffff-1111-2222-333344445555",
-            "teacher_name": "Dr. Grant",
-            "course_id": "66778899-aabb-ccdd-eeff-001122334455",
-            "course_name": "AI Ethics",
-            "hall_id": "50505050-6060-7070-8080-909090909090",
-            "hall_name": "Seminar Room 2"
-          }
-        ]
-      }
-    ],
-    "diagnostics": {
-      "constraints": {
-        "hard": [
-
-        ],
-        "soft": [
-          
-        ]
-      },
-      "summary": {
-        "message": "Unable to generate a valid timetable.",
-        "hard_constraints_met": false,
-        "soft_constraints_met": false,
-        "failed_soft_constraints_count": 100,
-        "failed_hard_constraints_count": 25
-      }
+          "blockers": [
+            {
+              "type": "INSUFFICIENT_TIME_SLOTS",
+              "entity": {
+                "type": "OPERATIONAL_PERIOD",
+                "details": "Total available hours across week is insufficient"
+              },
+              "conflict": {
+                "required_hours": 120,
+                "available_hours": 90
+              },
+              "evidence": {
+                "operational_hours": {
+                  "start_time": "08:00",
+                  "end_time": "17:00",
+                  "days": ["monday", "tuesday", "wednesday", "thursday", "friday"]
+                }
+              }
+            }
+          ],
+          "suggestions": [
+            {
+              "action": "EXTEND_OPERATIONAL_HOURS",
+              "description": "Extend operational hours or add Saturday to accommodate all courses",
+              "proposed_change": {
+                "end_time": "19:00"
+              }
+            }
+          ]
+        }
+      ],
+      "soft": []
     },
-    "metadata": {
-      "solve_time_seconds": 0.09
+    "summary": {
+      "message": "Unable to generate a valid timetable due to hard constraint violations.",
+      "hard_constraints_met": false,
+      "soft_constraints_met": false,
+      "failed_soft_constraints_count": 0,
+      "failed_hard_constraints_count": 1
     }
+  },
+  "metadata": {
+    "solve_time_seconds": 0.09
   }
 }
