@@ -9,7 +9,10 @@ from ortools.sat.python import cp_model
 from typing import List, Dict, Tuple, Optional, Set
 from models.schemas import (
     SchedulingRequest, SchedulingResponse, DaySchedule, ScheduleSlot,
-    Messages, ErrorMessage, AffectedEntity, RootCause
+    Messages, ErrorMessage, AffectedEntity, RootCause,
+    Diagnostics, DiagnosticsConstraints, DiagnosticsSummary, ResponseMetadata,
+    ConstraintFailure, DiagnosticBlocker,
+    RequiredJointCoursePeriods,
 )
 from datetime import datetime, time, timedelta
 import logging
@@ -49,6 +52,9 @@ class ORToolsScheduler:
         self.slot_times: Dict[str, Dict[int, Tuple[str, str]]] = {}  # day -> slot -> (start, end)
         self.variables: Dict = {}
         self.errors: List[ErrorMessage] = []
+        # Diagnostics (DR-01): collected during solve for response
+        self._hard_failures: List[ConstraintFailure] = []
+        self._soft_failures: List[ConstraintFailure] = []
         
     def solve_scheduling(self, request: SchedulingRequest) -> SchedulingResponse:
         """
@@ -62,7 +68,9 @@ class ORToolsScheduler:
         """
         self.request = request
         self.errors = []
-        
+        self._hard_failures = []
+        self._soft_failures = []
+
         try:
             # Step 1: Parse and validate operational periods
             self._parse_operational_periods()
@@ -80,7 +88,10 @@ class ORToolsScheduler:
             
             # Step 5: Add hard constraints
             self._add_hard_constraints()
-            
+            required_failures = self._add_required_joint_period_constraints()
+            if required_failures:
+                return self._build_response("ERROR", [], 0.0, hard_failures=required_failures, soft_failures=[])
+
             # Step 6: Add soft constraints and objective
             self._add_soft_constraints_and_objective()
             
@@ -114,8 +125,9 @@ class ORToolsScheduler:
             for day in self.days:
                 self.operational_hours[day] = (op_period.start_time, op_period.end_time)
         
-        # Apply per-day overrides
-        for constraint in op_period.constrains:
+        # Apply per-day overrides (doc: day_exceptions; legacy: constrains)
+        overrides = getattr(op_period, "day_exceptions", None) or op_period.constrains
+        for constraint in overrides or []:
             day = constraint.day.lower()
             if day in self.days:
                 self.operational_hours[day] = (constraint.start_time, constraint.end_time)
@@ -126,64 +138,70 @@ class ORToolsScheduler:
                 self.operational_hours[day] = (op_period.start_time, op_period.end_time)
     
     def _build_time_slots(self):
-        """Build discrete time slots for each day with configurable duration."""
+        """Build discrete time slots for each day; align to 15-min boundaries (00, 15, 30, 45)."""
         for day in self.days:
-            # Get period duration for this day
             period_duration = self._get_period_duration(day)
-            
             start_str, end_str = self.operational_hours[day]
             start_time = self._parse_time(start_str)
             end_time = self._parse_time(end_str)
-            
-            # Generate slots
+
+            # Align first slot start to next 15-min boundary (functional spec: standardized time slot alignment)
+            start_time = self._align_time_to_quarter_hour(start_time)
+            if start_time >= end_time:
+                self.slots_per_day[day] = []
+                self.slot_times[day] = {}
+                continue
+
             slots = []
             slot_times = {}
             current_time = start_time
             slot_idx = 0
-            
+
             while current_time < end_time:
                 next_time = self._add_minutes(current_time, period_duration)
                 if next_time > end_time:
-                    next_time = end_time
-                
+                    break
                 slots.append(slot_idx)
                 slot_times[slot_idx] = (
                     self._time_to_str(current_time),
-                    self._time_to_str(next_time)
+                    self._time_to_str(next_time),
                 )
-                
                 current_time = next_time
                 slot_idx += 1
-            
+
             self.slots_per_day[day] = slots
             self.slot_times[day] = slot_times
     
     def _get_period_duration(self, day: str) -> int:
         """
         Get period duration in minutes for a specific day.
-        
-        Logic:
-        1. If periods config exists and day has fixed period, use that
-        2. If periods config exists and daily is true, use default period
-        3. Otherwise, default to 30 minutes
+        Doc names: duration_minutes (default), day_exceptions (per-day). Legacy: period, daysFixedPeriods.
         """
         if not self.request.periods:
             return 30  # Default 30 minutes
-        
+
         periods_config = self.request.periods
-        
-        # Check for fixed period on this specific day
+        default_minutes = getattr(periods_config, "duration_minutes", None)
+        if default_minutes is None:
+            default_minutes = periods_config.period
+
+        # Per-day overrides: doc day_exceptions (top-level or under constrains) then legacy daysFixedPeriods
+        day_exc = getattr(periods_config, "day_exceptions", None) or (
+            getattr(periods_config.constrains, "day_exceptions", None) if periods_config.constrains else None
+        )
+        if day_exc:
+            for ex in day_exc:
+                ex_day = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+                if str(ex_day).lower() == day:
+                    return int(getattr(ex, "duration_minutes", ex.get("duration_minutes", default_minutes)))
         if periods_config.constrains and periods_config.constrains.daysFixedPeriods:
             for fixed_period in periods_config.constrains.daysFixedPeriods:
                 if fixed_period.day.lower() == day:
                     return fixed_period.period
-        
-        # Use default period if daily is true
+
         use_daily = self._parse_bool(periods_config.daily)
         if use_daily:
-            return periods_config.period
-        
-        # Fallback to default
+            return default_minutes
         return 30
     
     def _validate_input(self) -> List[str]:
@@ -229,7 +247,10 @@ class ORToolsScheduler:
         
         # Validate teacher preferred periods
         errors.extend(self._validate_teacher_preferred_periods())
-        
+
+        # Validate hall busy periods (optional day)
+        errors.extend(self._validate_hall_busy_periods())
+
         return errors
     
     def _validate_break_period(self) -> List[str]:
@@ -247,53 +268,89 @@ class ORToolsScheduler:
         except ValueError:
             errors.append(f"Invalid break period time format. Use HH:MM format (e.g., '12:00')")
         
-        # Validate days_exception
-        if break_config.constrains:
-            valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
-            for day in break_config.constrains.daysException:
-                if day.lower() not in valid_days:
-                    errors.append(f"Invalid day '{day}' in days_exception. Use valid weekdays: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, or Sunday")
-            
-            # Validate days_fixed_breaks
-            for fixed_break in break_config.constrains.daysFixedBreaks:
-                if fixed_break.day.lower() not in valid_days:
-                    errors.append(f"Invalid day '{fixed_break.day}' in days_fixed_breaks. Use valid weekdays")
-                
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+        def validate_day_list(days, label):
+            for day in days or []:
+                d = day.lower() if hasattr(day, "lower") else str(day).lower()
+                if d not in valid_days:
+                    errors.append(f"Invalid day in {label}. Use valid weekdays.")
+        def validate_fixed_breaks(breaks, label):
+            for fixed_break in breaks or []:
+                day = getattr(fixed_break, "day", fixed_break.get("day") if isinstance(fixed_break, dict) else "")
+                if str(day).lower() not in valid_days:
+                    errors.append(f"Invalid day in {label}. Use valid weekdays.")
                 try:
-                    fb_start = self._parse_time(fixed_break.start_time)
-                    fb_end = self._parse_time(fixed_break.end_time)
-                    if fb_start >= fb_end:
-                        errors.append(f"Fixed break for {fixed_break.day}: start time ({fixed_break.start_time}) must be before end time ({fixed_break.end_time})")
-                except ValueError:
-                    errors.append(f"Invalid time format in fixed break for {fixed_break.day}. Use HH:MM format")
-        
+                    s = getattr(fixed_break, "start_time", fixed_break.get("start_time"))
+                    e = getattr(fixed_break, "end_time", fixed_break.get("end_time"))
+                    if s and e:
+                        fb_start = self._parse_time(s)
+                        fb_end = self._parse_time(e)
+                        if fb_start >= fb_end:
+                            errors.append(f"Fixed break for {day}: start time must be before end time")
+                except (ValueError, TypeError):
+                    errors.append(f"Invalid time format in {label}. Use HH:MM format.")
+        no_break = getattr(break_config, "no_break_exceptions", None)
+        day_exc = getattr(break_config, "day_exceptions", None)
+        validate_day_list(no_break, "no_break_exceptions")
+        validate_fixed_breaks(day_exc, "day_exceptions")
+        if break_config.constrains:
+            validate_day_list(break_config.constrains.daysException, "daysException")
+            validate_fixed_breaks(break_config.constrains.daysFixedBreaks, "daysFixedBreaks")
+            if break_config.constrains.no_break_exceptions:
+                validate_day_list(break_config.constrains.no_break_exceptions, "constrains.no_break_exceptions")
+            if break_config.constrains.day_exceptions:
+                validate_fixed_breaks(break_config.constrains.day_exceptions, "constrains.day_exceptions")
         return errors
     
     def _validate_periods(self) -> List[str]:
-        """Validate periods configuration."""
+        """Validate periods configuration (period/duration_minutes, constrains/day_exceptions)."""
         errors = []
         periods_config = self.request.periods
-        
-        if periods_config.period <= 0:
-            errors.append("Period duration must be greater than 0 minutes")
-        
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+
+        default_dur = getattr(periods_config, "duration_minutes", None)
+        if default_dur is None:
+            default_dur = periods_config.period
+        if default_dur <= 0:
+            errors.append("Period duration (period or duration_minutes) must be greater than 0 minutes")
+
+        for ex in getattr(periods_config, "day_exceptions", None) or []:
+            d = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+            if str(d).lower() not in valid_days:
+                errors.append(f"Invalid day in periods day_exceptions")
+            dm = getattr(ex, "duration_minutes", ex.get("duration_minutes", 0))
+            if dm <= 0:
+                errors.append(f"Period duration_minutes for day must be greater than 0")
+
         if periods_config.constrains:
-            valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
-            
-            # Validate days_exception
             for day in periods_config.constrains.daysException:
                 if day.lower() not in valid_days:
                     errors.append(f"Invalid day '{day}' in periods days_exception")
-            
-            # Validate days_fixed_periods
             for fixed_period in periods_config.constrains.daysFixedPeriods:
                 if fixed_period.day.lower() not in valid_days:
                     errors.append(f"Invalid day '{fixed_period.day}' in days_fixed_periods")
                 if fixed_period.period <= 0:
                     errors.append(f"Period duration for {fixed_period.day} must be greater than 0 minutes")
-        
+            for ex in getattr(periods_config.constrains, "day_exceptions", None) or []:
+                d = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+                if str(d).lower() not in valid_days:
+                    errors.append("Invalid day in periods.constrains.day_exceptions")
+                dm = getattr(ex, "duration_minutes", ex.get("duration_minutes", 0))
+                if dm <= 0:
+                    errors.append("Period duration_minutes in day_exceptions must be greater than 0")
+
         return errors
     
+    def _validate_hall_busy_periods(self) -> List[str]:
+        """Validate hall busy periods (optional day must be valid if present)."""
+        errors = []
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+        for busy in self.request.hall_busy_periods:
+            day = getattr(busy, "day", None)
+            if day is not None and str(day).lower() not in valid_days:
+                errors.append(f"Invalid day '{day}' in hall_busy_periods for hall {busy.hall_id}")
+        return errors
+
     def _validate_teacher_busy_periods(self) -> List[str]:
         """Validate teacher busy periods."""
         errors = []
@@ -417,7 +474,121 @@ class ORToolsScheduler:
                     if hall_assignments:
                         # At most 1 course in this hall at this slot
                         self.model.Add(sum(hall_assignments) <= 1)
-    
+
+        # 4. Required joint course periods: fix assignments at exact (day, start_time, end_time)
+        # (validation and constraint addition done in _add_required_joint_period_constraints)
+
+    def _find_slot_index(self, day: str, start_time_str: str, end_time_str: str) -> Optional[int]:
+        """Return slot index for (day, start_time, end_time) or None if no matching slot."""
+        day = day.lower()
+        if day not in self.slot_times:
+            return None
+        for slot, (s_start, s_end) in self.slot_times[day].items():
+            if s_start == start_time_str and s_end == end_time_str:
+                return slot
+        return None
+
+    def _add_required_joint_period_constraints(self) -> List[ConstraintFailure]:
+        """Validate required joint periods and add var==1 constraints. Return list of hard failures if any."""
+        failures: List[ConstraintFailure] = []
+        if not getattr(self.request, "required_joint_course_periods", None):
+            return failures
+
+        for item in self.request.required_joint_course_periods:
+            course_idx = None
+            for idx, c in enumerate(self.request.teacher_courses):
+                if c.course_id == item.course_id and c.teacher_id == item.teacher_id:
+                    course_idx = idx
+                    break
+            if course_idx is None:
+                failures.append(ConstraintFailure(
+                    constraint_failed={
+                        "type": "REQUIRED_JOINT_COURSE_PERIODS",
+                        "details": {
+                            "course_id": item.course_id,
+                            "teacher_id": item.teacher_id,
+                            "reason": "course_id and teacher_id do not match any teacher_courses entry",
+                        },
+                    },
+                    blockers=[
+                        DiagnosticBlocker(
+                            type="TEACHER_COURSE_MISMATCH",
+                            entity={"type": "COURSE", "course_id": item.course_id, "teacher_id": item.teacher_id},
+                            conflict={"reason": "No matching teacher_courses entry"},
+                            evidence={},
+                        )
+                    ],
+                    suggestions=[],
+                ))
+                continue
+
+            if course_idx not in self.variables or "assignment" not in self.variables[course_idx]:
+                continue
+
+            for period in item.periods:
+                day = period.day.lower()
+                slot = self._find_slot_index(day, period.start_time, period.end_time)
+                if slot is None:
+                    failures.append(ConstraintFailure(
+                        constraint_failed={
+                            "type": "REQUIRED_JOINT_COURSE_PERIODS",
+                            "details": {
+                                "course_id": item.course_id,
+                                "teacher_id": item.teacher_id,
+                                "day": period.day,
+                                "start_time": period.start_time,
+                                "end_time": period.end_time,
+                                "reason": "No slot matches this exact time; check period duration and operational hours.",
+                            },
+                        },
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="SLOT_NOT_FOUND",
+                                conflict={
+                                    "day": period.day,
+                                    "start_time": period.start_time,
+                                    "end_time": period.end_time,
+                                },
+                                evidence={"message": "No slot with this exact start/end time in the grid."},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
+                    continue
+
+                # Find any feasible hall for this (course_idx, day, slot)
+                halls_here = self.variables[course_idx]["assignment"].get(day, {}).get(slot, {})
+                if not halls_here:
+                    failures.append(ConstraintFailure(
+                        constraint_failed={
+                            "type": "REQUIRED_JOINT_COURSE_PERIODS",
+                            "details": {
+                                "course_id": item.course_id,
+                                "teacher_id": item.teacher_id,
+                                "day": period.day,
+                                "start_time": period.start_time,
+                                "end_time": period.end_time,
+                                "reason": "No feasible hall at this slot (teacher busy, hall busy, or break).",
+                            },
+                        },
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="HALL_UNAVAILABLE",
+                                conflict={"day": period.day, "start_time": period.start_time, "end_time": period.end_time},
+                                evidence={},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
+                    continue
+
+                # Pick first available hall and fix assignment
+                hall_id = next(iter(halls_here))
+                var = self.variables[course_idx]["assignment"][day][slot][hall_id]
+                self.model.Add(var == 1)
+
+        return failures
+
     def _add_soft_constraints_and_objective(self):
         """Add soft constraints as weighted objectives."""
         objective_terms = []
@@ -525,15 +696,15 @@ class ORToolsScheduler:
             
             day_schedule = DaySchedule(day=day.capitalize(), slots=day_slots)
             timetable.append(day_schedule)
+
+        # Post-solve soft constraint checks (teacher max daily/weekly hours, etc.)
+        self._check_soft_constraints(timetable)
         
-        status_str = "OPTIMAL" if status == cp_model.OPTIMAL else "FEASIBLE"
-        
-        return SchedulingResponse(
-            timetable=timetable,
-            messages=Messages(error_message=[]),
-            status=status_str,
-            solve_time_seconds=solve_time
-        )
+        # RC-01: all hard and soft satisfied -> OPTIMAL; RC-02: hard met, soft failed -> PARTIAL (spec: no FEASIBLE)
+        status_str = "OPTIMAL" if status in (cp_model.OPTIMAL, cp_model.FEASIBLE) else "OPTIMAL"
+        if self._soft_failures:
+            status_str = "PARTIAL"
+        return self._build_response(status_str, timetable, solve_time, hard_failures=[], soft_failures=self._soft_failures)
     
     # ===========================
     # Helper Methods
@@ -546,7 +717,16 @@ class ORToolsScheduler:
     def _time_to_str(self, t: time) -> str:
         """Convert time object to HH:MM string."""
         return t.strftime('%H:%M')
-    
+
+    def _align_time_to_quarter_hour(self, t: time) -> time:
+        """Align time to next 15-min boundary (00, 15, 30, 45)."""
+        total_minutes = t.hour * 60 + t.minute
+        remainder = total_minutes % 15
+        if remainder == 0:
+            return t
+        aligned_minutes = total_minutes + (15 - remainder)
+        return self._add_minutes(datetime.min.time(), aligned_minutes)
+
     def _add_minutes(self, t: time, minutes: int) -> time:
         """Add minutes to a time object."""
         dt = datetime.combine(datetime.today(), t)
@@ -601,15 +781,17 @@ class ORToolsScheduler:
                     if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
                         return False
         
-        # 2. Check hall busy periods
+        # 2. Check hall busy periods (optional day: if set, only block on that day)
         for busy_period in self.request.hall_busy_periods:
-            if busy_period.hall_id == hall.hall_id:
-                # Note: hall_busy_periods don't have day field in schema, 
-                # but we check if time overlaps (assuming same day)
-                busy_start = self._parse_time(busy_period.start_time)
-                busy_end = self._parse_time(busy_period.end_time)
-                if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
-                    return False
+            if busy_period.hall_id != hall.hall_id:
+                continue
+            busy_day = getattr(busy_period, "day", None)
+            if busy_day is not None and str(busy_day).lower() != day:
+                continue
+            busy_start = self._parse_time(busy_period.start_time)
+            busy_end = self._parse_time(busy_period.end_time)
+            if self._times_overlap(slot_start, slot_end, busy_start, busy_end):
+                return False
         
         # 3. Check break periods
         if self._is_slot_in_break_period(day, slot_start, slot_end):
@@ -633,33 +815,51 @@ class ORToolsScheduler:
         # Check overlap: start1 < end2 and start2 < end1
         return start1 < end2 and start2 < end1
     
-    def _is_slot_in_break_period(self, day: str, slot_start: time, slot_end: time) -> bool:
-        """Check if a slot overlaps with break period for the given day."""
+    def _get_no_break_days(self) -> List[str]:
+        """Days where break is completely removed (no_break_exceptions then daysException)."""
         break_config = self.request.break_period
-        
-        # Check if day is in exceptions - no break on exception days
+        top = getattr(break_config, "no_break_exceptions", None)
+        if top:
+            return [d.lower() for d in top]
         if break_config.constrains:
-            if day in [d.lower() for d in break_config.constrains.daysException]:
-                return False  # No break on exception days, so slot is not in break
-        
-        # Check for fixed break on this day
-        if break_config.constrains and break_config.constrains.daysFixedBreaks:
-            for fixed_break in break_config.constrains.daysFixedBreaks:
-                if fixed_break.day.lower() == day:
-                    break_start = self._parse_time(fixed_break.start_time)
-                    break_end = self._parse_time(fixed_break.end_time)
-                    if self._times_overlap(slot_start, slot_end, break_start, break_end):
-                        return True
-                    return False  # Fixed break exists but doesn't overlap
-        
-        # Use default break if daily is true
+            return [d.lower() for d in break_config.constrains.daysException]
+        return []
+
+    def _get_break_day_override(self, day: str) -> Optional[Tuple[str, str]]:
+        """Per-day break (start_time, end_time) if overridden; else None. Apply after no_break."""
+        break_config = self.request.break_period
+        day = day.lower()
+        overrides = getattr(break_config, "day_exceptions", None) or (
+            list(break_config.constrains.daysFixedBreaks) if break_config.constrains else []
+        )
+        if not overrides:
+            return None
+        for ex in overrides:
+            if getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "").lower() == day:
+                s = getattr(ex, "start_time", ex.get("start_time"))
+                e = getattr(ex, "end_time", ex.get("end_time"))
+                if s and e:
+                    return (s, e)
+        return None
+
+    def _is_slot_in_break_period(self, day: str, slot_start: time, slot_end: time) -> bool:
+        """Check if a slot overlaps with break period. Order: no_break_exceptions, then day_exceptions, else default."""
+        break_config = self.request.break_period
+        day_lower = day.lower()
+        no_break_days = self._get_no_break_days()
+        if day_lower in no_break_days:
+            return False
+        override = self._get_break_day_override(day)
+        if override:
+            break_start = self._parse_time(override[0])
+            break_end = self._parse_time(override[1])
+            return self._times_overlap(slot_start, slot_end, break_start, break_end)
         use_daily = self._parse_bool(break_config.daily)
         if use_daily:
             break_start = self._parse_time(break_config.start_time)
             break_end = self._parse_time(break_config.end_time)
             if self._times_overlap(slot_start, slot_end, break_start, break_end):
                 return True
-        
         return False
     
     def _is_slot_in_teacher_preference(self, course, day: str, slot_start: time, slot_end: time) -> bool:
@@ -690,36 +890,22 @@ class ORToolsScheduler:
     
     def _get_break_slots(self, day: str) -> List[ScheduleSlot]:
         """
-        Get break time slots for a day.
-        
-        Logic:
-        1. If day is in days_exception, return empty (no break)
-        2. If day has a fixed break in days_fixed_breaks, use that
-        3. If daily is true and no fixed break, use default break times
-        4. Otherwise, no break
+        Get break time slots for a day. Order: no_break_exceptions (no break), then day_exceptions, else default.
         """
         break_slots = []
         break_config = self.request.break_period
-        
-        # Step 1: Check if day is in exceptions - skip break entirely
-        if break_config.constrains:
-            if day in [d.lower() for d in break_config.constrains.daysException]:
-                return []  # No break on exception days
-        
-        # Step 2: Check for fixed break on this specific day
-        if break_config.constrains and break_config.constrains.daysFixedBreaks:
-            for fixed_break in break_config.constrains.daysFixedBreaks:
-                if fixed_break.day.lower() == day:
-                    # Use the fixed break time for this day
-                    break_slots.append(ScheduleSlot(
-                        day=day.capitalize(),
-                        start_time=fixed_break.start_time,
-                        end_time=fixed_break.end_time,
-                        break_=True
-                    ))
-                    return break_slots  # Fixed break overrides default
-        
-        # Step 3: Use default break if daily is true
+        day_lower = day.lower()
+        if day_lower in self._get_no_break_days():
+            return []
+        override = self._get_break_day_override(day)
+        if override:
+            break_slots.append(ScheduleSlot(
+                day=day.capitalize(),
+                start_time=override[0],
+                end_time=override[1],
+                break_=True
+            ))
+            return break_slots
         use_daily = self._parse_bool(break_config.daily)
         if use_daily:
             break_slots.append(ScheduleSlot(
@@ -728,61 +914,620 @@ class ORToolsScheduler:
                 end_time=break_config.end_time,
                 break_=True
             ))
-        
         return break_slots
-    
-    def _create_infeasible_response(self, errors: List[str]) -> SchedulingResponse:
-        """Create response for infeasible problem."""
-        error_messages = []
-        
-        for err in errors:
-            # Create detailed error message
-            error_msg = ErrorMessage(
-                constraint_type="HARD",
-                severity="ERROR",
-                code="INFEASIBLE_SCHEDULE",
-                title="Infeasible Schedule",
-                description=err,
-                root_causes=[
-                    RootCause(
-                        cause="Constraint conflict",
-                        details="The provided constraints cannot be satisfied simultaneously."
-                    )
-                ],
-                resolution_hint="Try relaxing constraints, adding more halls or time slots, or reducing course hours."
-            )
-            error_messages.append(error_msg)
-        
-        return SchedulingResponse(
-            timetable=[],
-            messages=Messages(error_message=error_messages),
-            status="INFEASIBLE",
-            solve_time_seconds=0.0
+
+    def _parse_max_hours_limit(self, field_value) -> Tuple[Optional[float], Dict[str, float]]:
+        """Parse teacher_max_daily_hours or teacher_max_weekly_hours: (default_hours, teacher_exceptions dict)."""
+        if field_value is None:
+            return None, {}
+        if isinstance(field_value, (int, float)):
+            return float(field_value), {}
+        if isinstance(field_value, dict):
+            default = field_value.get("max_hours")
+            if default is not None:
+                default = float(default)
+            exceptions = {}
+            for ex in field_value.get("teacher_exceptions", []):
+                tid = ex.get("teacher_id")
+                mh = ex.get("max_hours")
+                if tid is not None and mh is not None:
+                    exceptions[tid] = float(mh)
+            return default, exceptions
+        if isinstance(field_value, str):
+            try:
+                return float(field_value), {}
+            except ValueError:
+                return None, {}
+        return None, {}
+
+    def _slot_duration_hours(self, start_str: str, end_str: str) -> float:
+        """Return duration in hours (fractional) for a slot."""
+        start_t = self._parse_time(start_str)
+        end_t = self._parse_time(end_str)
+        start_dt = datetime.combine(datetime.today(), start_t)
+        end_dt = datetime.combine(datetime.today(), end_t)
+        if end_dt <= start_dt:
+            end_dt += timedelta(days=1)
+        return (end_dt - start_dt).total_seconds() / 3600.0
+
+    def _check_soft_constraints(self, timetable: List[DaySchedule]) -> None:
+        """Post-solve: check teacher max daily/weekly hours and append to _soft_failures."""
+        # Collect teaching slots: (teacher_id, teacher_name, day, start_time, end_time, course_id) -> hours
+        teacher_daily: Dict[str, Dict[str, List[Dict]]] = {}  # teacher_id -> day -> list of slot infos
+        teacher_weekly: Dict[str, List[Dict]] = {}  # teacher_id -> list of slot infos
+
+        for day_schedule in timetable:
+            day = day_schedule.day
+            for slot in day_schedule.slots:
+                if getattr(slot, "break_", False):
+                    continue
+                if not getattr(slot, "teacher_id", None):
+                    continue
+                hours = self._slot_duration_hours(slot.start_time, slot.end_time)
+                tid = slot.teacher_id
+                info = {
+                    "day": day,
+                    "start_time": slot.start_time,
+                    "end_time": slot.end_time,
+                    "course_id": getattr(slot, "course_id", ""),
+                    "hours": hours,
+                }
+                if tid not in teacher_daily:
+                    teacher_daily[tid] = {}
+                    teacher_weekly[tid] = []
+                if day not in teacher_daily[tid]:
+                    teacher_daily[tid][day] = []
+                teacher_daily[tid][day].append(info)
+                teacher_weekly[tid].append(info)
+
+        sc = self.request.soft_constrains
+        default_daily, exceptions_daily = self._parse_max_hours_limit(getattr(sc, "teacher_max_daily_hours", None))
+        default_weekly, exceptions_weekly = self._parse_max_hours_limit(getattr(sc, "teacher_max_weekly_hours", None))
+
+        # Check daily
+        if default_daily is not None:
+            daily_blockers = []
+            for tid, by_day in teacher_daily.items():
+                limit = exceptions_daily.get(tid, default_daily)
+                for day, slots in by_day.items():
+                    total = sum(s["hours"] for s in slots)
+                    if total > limit:
+                        teacher_name = (slots[0].get("teacher_name") if slots else "") or next(
+                            (t.name for t in self.request.teachers if t.teacher_id == tid), tid
+                        )
+                        # Resolve teacher name from request if not in slot
+                        for t in self.request.teachers:
+                            if t.teacher_id == tid:
+                                teacher_name = t.name
+                                break
+                        daily_blockers.append(DiagnosticBlocker(
+                            type="TEACHER_MAX_DAILY_HOURS_EXCEEDED",
+                            entity={"type": "TEACHER", "id": tid, "name": teacher_name},
+                            conflict={"max_allowed_hours": limit, "actual_hours": round(total, 2), "excess": round(total - limit, 2)},
+                            evidence={
+                                "booked_slots": [
+                                    {"day": s["day"], "start_time": s["start_time"], "end_time": s["end_time"], "course_id": s["course_id"], "hours": s["hours"]}
+                                    for s in slots
+                                ]
+                            },
+                        ))
+            if daily_blockers:
+                actuals = [b.conflict.get("actual_hours", 0) for b in daily_blockers if b.conflict]
+                suggested = max(actuals, default=default_daily)
+                self._soft_failures.append(ConstraintFailure(
+                    constraint_failed={"type": "teacher_max_daily_hours", "rule": {"max_daily_hours": default_daily}},
+                    blockers=daily_blockers,
+                    suggestions=[{"parameter": "teacher_max_daily_hours", "proposed_value": suggested}],
+                ))
+
+        # Check weekly
+        if default_weekly is not None:
+            weekly_blockers = []
+            for tid, slots in teacher_weekly.items():
+                limit = exceptions_weekly.get(tid, default_weekly)
+                total = sum(s["hours"] for s in slots)
+                if total > limit:
+                    teacher_name = next((t.name for t in self.request.teachers if t.teacher_id == tid), tid)
+                    weekly_blockers.append(DiagnosticBlocker(
+                        type="TEACHER_MAX_WEEKLY_HOURS_EXCEEDED",
+                        entity={"type": "TEACHER", "id": tid, "name": teacher_name},
+                        conflict={"max_allowed_hours": limit, "actual_hours": round(total, 2), "excess": round(total - limit, 2)},
+                        evidence={
+                            "booked_slots": [
+                                {"day": s["day"], "start_time": s["start_time"], "end_time": s["end_time"], "course_id": s["course_id"], "hours": s["hours"]}
+                                for s in slots
+                            ]
+                        },
+                    ))
+            if weekly_blockers:
+                self._soft_failures.append(ConstraintFailure(
+                    constraint_failed={"type": "teacher_max_weekly_hours", "rule": {"max_weekly_hours": default_weekly}},
+                    blockers=weekly_blockers,
+                    suggestions=[{"parameter": "teacher_max_weekly_hours", "proposed_value": default_weekly}],
+                ))
+
+        # schedule_max_periods_per_day
+        max_periods_limit, max_periods_day_exceptions = self._parse_per_day_limit(
+            getattr(sc, "schedule_max_periods_per_day", None) or getattr(sc, "time_max_periods_per_day", None)
         )
-    
-    def _create_error_response(self, error: str) -> SchedulingResponse:
-        """Create response for solver error."""
+        if max_periods_limit is not None:
+            periods_per_day = {}
+            for day_schedule in timetable:
+                day = day_schedule.day
+                count = sum(1 for s in day_schedule.slots if not getattr(s, "break_", False))
+                periods_per_day[day] = count
+            for day, count in periods_per_day.items():
+                limit = max_periods_day_exceptions.get(day.lower(), max_periods_limit)
+                if count > limit:
+                    self._soft_failures.append(ConstraintFailure(
+                        constraint_failed={"type": "schedule_max_periods_per_day", "details": {"max_periods": max_periods_limit}},
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="MAX_DAILY_PERIODS_EXCEEDED",
+                                entity={"type": "daily_periods", "day": day, "max_periods": limit},
+                                conflict={"day": day, "current_periods": count},
+                                evidence={"daily_schedule": []},
+                            )
+                        ],
+                        suggestions=[{"parameter": "schedule_max_periods_per_day", "proposed_value": count}],
+                    ))
+                    break
+
+        # schedule_max_free_periods_per_day (gaps in the grid)
+        max_free_limit, max_free_day_exceptions = self._parse_per_day_limit(
+            getattr(sc, "schedule_max_free_periods_per_day", None) or getattr(sc, "time_min_free_periods_per_day", None)
+        )
+        if max_free_limit is not None and hasattr(self, "slots_per_day") and self.slots_per_day:
+            for day, slot_list in self.slots_per_day.items():
+                total_slots = len(slot_list)
+                teaching_count = sum(
+                    1 for ds in timetable if ds.day.lower() == day.lower()
+                    for s in ds.slots if not getattr(s, "break_", False)
+                )
+                free_count = total_slots - teaching_count
+                limit = max_free_day_exceptions.get(day.lower(), max_free_limit)
+                if free_count > limit:
+                    self._soft_failures.append(ConstraintFailure(
+                        constraint_failed={"type": "schedule_max_free_periods_per_day", "details": {"max_free_periods": max_free_limit}},
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="MAX_FREE_PERIODS_EXCEEDED",
+                                entity={"type": "daily_free_periods", "day": day},
+                                conflict={"day": day, "current_free_periods": free_count, "max_allowed": limit},
+                                evidence={},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
+                    break
+
+        # course_max_daily_frequency
+        max_freq_limit, course_exceptions = self._parse_course_frequency_limit(
+            getattr(sc, "course_max_daily_frequency", None) or getattr(sc, "time_subject_frequency_per_day", None)
+        )
+        if max_freq_limit is not None:
+            course_daily = {}
+            for day_schedule in timetable:
+                day = day_schedule.day
+                for slot in day_schedule.slots:
+                    if getattr(slot, "break_", False):
+                        continue
+                    cid = getattr(slot, "course_id", None)
+                    if not cid:
+                        continue
+                    key = (day.lower(), cid)
+                    course_daily[key] = course_daily.get(key, 0) + 1
+            for (day, course_id), count in course_daily.items():
+                limit = course_exceptions.get(course_id, max_freq_limit)
+                if count > limit:
+                    self._soft_failures.append(ConstraintFailure(
+                        constraint_failed={"type": "course_max_daily_frequency", "details": {"max_frequency": max_freq_limit}},
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="MAX_COURSE_DAILY_FREQUENCY_EXCEEDED",
+                                entity={"type": "COURSE", "id": course_id},
+                                conflict={"course_id": course_id, "day": day, "current_frequency": count, "max_allowed": limit},
+                                evidence={"course_schedule": []},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
+                    break
+
+        # Requested placement soft checks (post-solve: compare timetable to requested windows/assignments/free periods)
+        self._check_requested_time_windows_and_assignments(timetable)
+        self._check_requested_free_periods(timetable)
+
+    def _teaching_slots_from_timetable(self, timetable: List[DaySchedule]) -> List[Dict]:
+        """Return list of teaching slot dicts: day, start_time, end_time, teacher_id, hall_id, course_id."""
+        out = []
+        for day_schedule in timetable:
+            day = day_schedule.day
+            for slot in day_schedule.slots:
+                if getattr(slot, "break_", False):
+                    continue
+                out.append({
+                    "day": day,
+                    "start_time": getattr(slot, "start_time", ""),
+                    "end_time": getattr(slot, "end_time", ""),
+                    "teacher_id": getattr(slot, "teacher_id", ""),
+                    "hall_id": getattr(slot, "hall_id", ""),
+                    "course_id": getattr(slot, "course_id", ""),
+                })
+        return out
+
+    def _slot_overlaps_window(self, slot_day: str, slot_start: str, slot_end: str,
+                             win_day, win_start: Optional[str], win_end: Optional[str]) -> bool:
+        """True if (slot_day, slot_start-slot_end) is within/overlaps window (win_day, win_start-win_end)."""
+        slot_day_l = slot_day.lower() if isinstance(slot_day, str) else ""
+        win_days = [win_day.lower()] if isinstance(win_day, str) else [d.lower() for d in win_day] if isinstance(win_day, list) else []
+        if slot_day_l not in win_days:
+            return False
+        if not win_start or not win_end:
+            return True
+        s0 = self._parse_time(slot_start)
+        s1 = self._parse_time(slot_end)
+        w0 = self._parse_time(win_start)
+        w1 = self._parse_time(win_end)
+        return self._times_overlap(s0, s1, w0, w1)
+
+    def _expand_requested_days(self, day_spec) -> List[str]:
+        """Expand day spec (string or list of days) to list of lowercase day strings."""
+        if day_spec is None:
+            return []
+        if isinstance(day_spec, str):
+            return [day_spec.lower()]
+        if isinstance(day_spec, list):
+            return [d.lower() for d in day_spec if isinstance(d, str)]
+        return []
+
+    def _check_requested_time_windows_and_assignments(self, timetable: List[DaySchedule]) -> None:
+        """Emit soft failures when course/teacher/hall requested slots or requested_assignments are not satisfied."""
+        teaching = self._teaching_slots_from_timetable(timetable)
+        sc = self.request.soft_constrains
+
+        # course_requested_time_slots: list of { course_id, slots: [{ day, start_time?, end_time? }] }
+        course_requested = getattr(sc, "course_requested_time_slots", None) or []
+        if isinstance(course_requested, list):
+            for item in course_requested:
+                if not isinstance(item, dict):
+                    continue
+                cid = item.get("course_id")
+                if not cid:
+                    continue
+                slots_spec = item.get("slots") or []
+                for t in teaching:
+                    if t.get("course_id") != cid:
+                        continue
+                    matched = False
+                    for slot_spec in slots_spec:
+                        if not isinstance(slot_spec, dict):
+                            continue
+                        req_days = self._expand_requested_days(slot_spec.get("day"))
+                        if req_days and t["day"].lower() not in req_days:
+                            continue
+                        req_start = slot_spec.get("start_time")
+                        req_end = slot_spec.get("end_time")
+                        if req_start and req_end:
+                            if self._slot_overlaps_window(t["day"], t["start_time"], t["end_time"], t["day"], req_start, req_end):
+                                matched = True
+                                break
+                        else:
+                            matched = True
+                            break
+                    if not matched:
+                        self._soft_failures.append(ConstraintFailure(
+                            constraint_failed={"type": "course_requested_time_slots", "details": {"course_id": cid}},
+                            blockers=[
+                                DiagnosticBlocker(
+                                    type="COURSE_SCHEDULED_OUTSIDE_REQUESTED_SLOTS",
+                                    entity={"type": "COURSE", "id": cid},
+                                    conflict={"day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                    evidence={"scheduled_slot": t},
+                                )
+                            ],
+                            suggestions=[],
+                        ))
+                        break
+                break
+
+        # requested_assignments: list of { course_id, teacher_id, hall_id, day?, start_time?, end_time? }
+        requested_assignments = getattr(sc, "requested_assignments", None) or []
+        if isinstance(requested_assignments, list):
+            for req in requested_assignments:
+                if not isinstance(req, dict):
+                    continue
+                cid = req.get("course_id")
+                tid = req.get("teacher_id")
+                hid = req.get("hall_id")
+                rday = req.get("day")
+                rstart = req.get("start_time")
+                rend = req.get("end_time")
+                if not all([cid, tid, hid]):
+                    continue
+                rday_norm = (rday.lower() if isinstance(rday, str) else (rday[0].lower() if isinstance(rday, list) and rday else "")) if rday else ""
+                found = any(
+                    t.get("course_id") == cid and t.get("teacher_id") == tid and t.get("hall_id") == hid
+                    and (not rday_norm or t["day"].lower() == rday_norm)
+                    and (not rstart or not rend or (t["start_time"] == rstart and t["end_time"] == rend))
+                    for t in teaching
+                )
+                if not found:
+                    self._soft_failures.append(ConstraintFailure(
+                        constraint_failed={"type": "requested_assignments", "details": {"course_id": cid, "teacher_id": tid, "hall_id": hid, "day": rday, "start_time": rstart, "end_time": rend}},
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="REQUESTED_ASSIGNMENT_NOT_SATISFIED",
+                                entity={"type": "COURSE", "id": cid},
+                                conflict={"requested": req},
+                                evidence={},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
+
+        # teacher_requested_time_windows: list of { teacher_id, windows: [{ day, start_time?, end_time? }] }
+        teacher_windows = getattr(sc, "teacher_requested_time_windows", None) or []
+        if isinstance(teacher_windows, list):
+            for tw in teacher_windows:
+                if not isinstance(tw, dict):
+                    continue
+                teacher_id = tw.get("teacher_id")
+                windows = tw.get("windows") or []
+                for t in teaching:
+                    if t.get("teacher_id") != teacher_id:
+                        continue
+                    matched = any(
+                        self._slot_overlaps_window(
+                            t["day"], t["start_time"], t["end_time"],
+                            w.get("day"), w.get("start_time"), w.get("end_time")
+                        )
+                        for w in windows if isinstance(w, dict)
+                    )
+                    if not matched:
+                        self._soft_failures.append(ConstraintFailure(
+                            constraint_failed={"type": "teacher_requested_time_windows", "details": {"teacher_id": teacher_id}},
+                            blockers=[
+                                DiagnosticBlocker(
+                                    type="TEACHER_SCHEDULED_OUTSIDE_REQUESTED_WINDOWS",
+                                    entity={"type": "TEACHER", "id": teacher_id},
+                                    conflict={"day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                    evidence={"scheduled_slot": t},
+                                )
+                            ],
+                            suggestions=[],
+                        ))
+                        break
+                break
+
+        # hall_requested_time_windows: list of { hall_id, windows: [{ day, start_time?, end_time? }] }
+        hall_windows = getattr(sc, "hall_requested_time_windows", None) or []
+        if isinstance(hall_windows, list):
+            for hw in hall_windows:
+                if not isinstance(hw, dict):
+                    continue
+                hall_id = hw.get("hall_id")
+                windows = hw.get("windows") or []
+                for t in teaching:
+                    if t.get("hall_id") != hall_id:
+                        continue
+                    matched = any(
+                        self._slot_overlaps_window(
+                            t["day"], t["start_time"], t["end_time"],
+                            w.get("day"), w.get("start_time"), w.get("end_time")
+                        )
+                        for w in windows if isinstance(w, dict)
+                    )
+                    if not matched:
+                        self._soft_failures.append(ConstraintFailure(
+                            constraint_failed={"type": "hall_requested_time_windows", "details": {"hall_id": hall_id}},
+                            blockers=[
+                                DiagnosticBlocker(
+                                    type="HALL_SCHEDULED_OUTSIDE_REQUESTED_WINDOWS",
+                                    entity={"type": "HALL", "id": hall_id},
+                                    conflict={"day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                    evidence={"scheduled_slot": t},
+                                )
+                            ],
+                            suggestions=[],
+                        ))
+                        break
+                break
+
+    def _check_requested_free_periods(self, timetable: List[DaySchedule]) -> None:
+        """Emit soft failure when a requested free period is occupied by a class."""
+        teaching = self._teaching_slots_from_timetable(timetable)
+        requested = getattr(self.request.soft_constrains, "requested_free_periods", None) or []
+        if not isinstance(requested, list):
+            return
+        for req in requested:
+            if not isinstance(req, dict):
+                continue
+            req_days = self._expand_requested_days(req.get("day"))
+            req_start = req.get("start_time")
+            req_end = req.get("end_time")
+            if not req_days:
+                continue
+            if not req_start or not req_end:
+                continue
+            for t in teaching:
+                if t["day"].lower() not in req_days:
+                    continue
+                if self._slot_overlaps_window(t["day"], t["start_time"], t["end_time"], t["day"], req_start, req_end):
+                    self._soft_failures.append(ConstraintFailure(
+                        constraint_failed={"type": "requested_free_period", "details": {"day": req.get("day"), "start_time": req_start, "end_time": req_end}},
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="REQUESTED_FREE_PERIOD_OCCUPIED",
+                                entity={"type": "TIME_SLOT", "day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                conflict={"requested_free": req, "scheduled_course": t.get("course_id")},
+                                evidence={"scheduled_slot": t},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
+                    break
+
+    def _parse_per_day_limit(self, field_value) -> Tuple[Optional[int], Dict[str, int]]:
+        """Parse max_periods or max_free_periods: (default_limit, day_exceptions dict)."""
+        if field_value is None:
+            return None, {}
+        if isinstance(field_value, (int, float)):
+            return int(field_value), {}
+        if isinstance(field_value, dict):
+            default = field_value.get("max_periods") or field_value.get("max_free_periods")
+            if default is not None:
+                default = int(default)
+            exceptions = {}
+            for ex in field_value.get("day_exceptions", []):
+                d = ex.get("day", "").lower()
+                v = ex.get("max_periods") or ex.get("max_free_periods")
+                if d and v is not None:
+                    exceptions[d] = int(v)
+            return default, exceptions
+        if isinstance(field_value, str):
+            try:
+                return int(field_value), {}
+            except ValueError:
+                return None, {}
+        return None, {}
+
+    def _parse_course_frequency_limit(self, field_value) -> Tuple[Optional[int], Dict[str, int]]:
+        """Parse course_max_daily_frequency: (default_max_frequency, course_exceptions dict)."""
+        if field_value is None:
+            return None, {}
+        if isinstance(field_value, (int, float)):
+            return int(field_value), {}
+        if isinstance(field_value, dict):
+            default = field_value.get("max_frequency")
+            if default is not None:
+                default = int(default)
+            exceptions = {}
+            for ex in field_value.get("course_exceptions", []):
+                cid = ex.get("course_id")
+                v = ex.get("max_frequency")
+                if cid is not None and v is not None:
+                    exceptions[cid] = int(v)
+            return default, exceptions
+        if isinstance(field_value, str):
+            try:
+                return int(field_value), {}
+            except ValueError:
+                return None, {}
+        return None, {}
+
+    def _build_response(
+        self,
+        status: str,
+        timetable: List[DaySchedule],
+        solve_time: float,
+        hard_failures: Optional[List[ConstraintFailure]] = None,
+        soft_failures: Optional[List[ConstraintFailure]] = None,
+    ) -> SchedulingResponse:
+        """Build response with diagnostics and summary (RC-01 to RC-04, DR-01)."""
+        hard_failures = hard_failures if hard_failures is not None else self._hard_failures
+        soft_failures = soft_failures if soft_failures is not None else self._soft_failures
+        hard_met = len(hard_failures) == 0
+        soft_met = len(soft_failures) == 0
+
+        if status not in ("OPTIMAL", "PARTIAL", "ERROR"):
+            status = "ERROR" if not hard_met else ("PARTIAL" if not soft_met else "OPTIMAL")
+
+        if hard_met and soft_met:
+            summary_msg = "All constraints satisfied."
+        elif hard_met and not soft_met:
+            summary_msg = "Timetable generated, but some preferences could not be met."
+        else:
+            summary_msg = "Unable to generate a valid timetable."
+
+        diagnostics = Diagnostics(
+            constraints=DiagnosticsConstraints(hard=hard_failures, soft=soft_failures),
+            summary=DiagnosticsSummary(
+                message=summary_msg,
+                hard_constraints_met=hard_met,
+                soft_constraints_met=soft_met,
+                failed_soft_constraints_count=len(soft_failures),
+                failed_hard_constraints_count=len(hard_failures),
+            ),
+        )
+        legacy_messages = Messages(error_message=self.errors)
         return SchedulingResponse(
-            timetable=[],
-            messages=Messages(error_message=[
+            status=status,
+            timetable=timetable,
+            diagnostics=diagnostics,
+            metadata=ResponseMetadata(solve_time_seconds=solve_time),
+            messages=legacy_messages,
+            solve_time_seconds=solve_time,
+        )
+
+    def _create_infeasible_response(self, errors: List[str]) -> SchedulingResponse:
+        """Create response for infeasible problem (ERROR status, hard diagnostic)."""
+        blockers = [
+            DiagnosticBlocker(
+                type="INFEASIBLE_SCHEDULE",
+                conflict={"reason": err},
+                evidence={"validation_errors": errors},
+            )
+            for err in errors
+        ]
+        if not blockers:
+            blockers = [
+                DiagnosticBlocker(
+                    type="INFEASIBLE_SCHEDULE",
+                    conflict={"reason": "No feasible schedule exists."},
+                    evidence={},
+                )
+            ]
+        failure = ConstraintFailure(
+            constraint_failed={"type": "INFEASIBLE_SCHEDULE", "details": {"errors": errors}},
+            blockers=blockers,
+            suggestions=[
+                {"action": "RELAX_CONSTRAINTS", "message": "Try relaxing constraints, adding more halls or time slots, or reducing course hours."}
+            ],
+        )
+        self._hard_failures = [failure]
+        for err in errors:
+            self.errors.append(
                 ErrorMessage(
                     constraint_type="HARD",
                     severity="ERROR",
-                    code="SOLVER_ERROR",
-                    title="Solver Error",
-                    description=error,
-                    root_causes=[
-                        RootCause(
-                            cause="Unexpected solver failure",
-                            details=error
-                        )
-                    ],
-                    resolution_hint="Please check your input data and try again. If the problem persists, contact support."
+                    code="INFEASIBLE_SCHEDULE",
+                    title="Infeasible Schedule",
+                    description=err,
+                    root_causes=[RootCause(cause="Constraint conflict", details="The provided constraints cannot be satisfied simultaneously.")],
+                    resolution_hint="Try relaxing constraints, adding more halls or time slots, or reducing course hours.",
                 )
-            ]),
-            status="ERROR",
-            solve_time_seconds=0.0
+            )
+        return self._build_response("ERROR", [], 0.0, hard_failures=[failure], soft_failures=[])
+
+    def _create_error_response(self, error: str) -> SchedulingResponse:
+        """Create response for solver error (ERROR status, hard diagnostic)."""
+        failure = ConstraintFailure(
+            constraint_failed={"type": "SOLVER_ERROR", "details": {"message": error}},
+            blockers=[
+                DiagnosticBlocker(
+                    type="SOLVER_ERROR",
+                    conflict={"message": error},
+                    evidence={},
+                )
+            ],
+            suggestions=[
+                {"action": "RETRY_OR_CONTACT_SUPPORT", "message": "Please check your input data and try again. If the problem persists, contact support."}
+            ],
         )
+        self._hard_failures = [failure]
+        self.errors.append(
+            ErrorMessage(
+                constraint_type="HARD",
+                severity="ERROR",
+                code="SOLVER_ERROR",
+                title="Solver Error",
+                description=error,
+                root_causes=[RootCause(cause="Unexpected solver failure", details=error)],
+                resolution_hint="Please check your input data and try again. If the problem persists, contact support.",
+            )
+        )
+        return self._build_response("ERROR", [], 0.0, hard_failures=[failure], soft_failures=[])
     
     def _build_teacher_course_map(self) -> Dict[str, List[int]]:
         """Build mapping from teacher_id to list of course indices."""

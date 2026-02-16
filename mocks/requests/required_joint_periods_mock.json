@@ -1,0 +1,34 @@
+{
+  "teachers": [{"teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "name": "Dr. Jones"}],
+  "teacher_courses": [{
+    "course_id": "00d6c93b-4bf9-4634-adc2-293f3c513c18",
+    "course_title": "Physics",
+    "course_credit": 2,
+    "course_type": "theory",
+    "course_hours": 30,
+    "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "teacher_name": "Dr. Jones"
+  }],
+  "halls": [{"hall_id": "h1", "hall_name": "Lecture Hall", "hall_capacity": 50, "hall_type": "lecture"}],
+  "teacher_busy_period": [],
+  "teacher_prefered_teaching_period": [],
+  "hall_busy_periods": [],
+  "break_period": {"start_time": "12:00", "end_time": "13:00", "daily": true},
+  "operational_period": {
+    "start_time": "08:00",
+    "end_time": "17:00",
+    "daily": true,
+    "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    "constrains": []
+  },
+  "periods": {"daily": true, "period": 60},
+  "required_joint_course_periods": [{
+    "course_id": "00d6c93b-4bf9-4634-adc2-293f3c513c18",
+    "teacher_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "periods": [
+      {"day": "monday", "start_time": "10:00", "end_time": "11:00"},
+      {"day": "wednesday", "start_time": "14:00", "end_time": "15:00"}
+    ]
+  }],
+  "soft_constrains": {}
+}

@@ -56,6 +56,21 @@ curl -X POST http://localhost:8080/api/v1/schedule/without-preference \
   -d @examples/sample_request.json
 ```
 
+### Testing with mocks (Swagger or curl)
+Ready-to-use request bodies built from `mocks/constraints/` are in **`mocks/requests/`**:
+
+| File | Use case |
+|------|----------|
+| `mocks/requests/minimal_valid.json` | Minimal valid request |
+| `mocks/requests/break_period_mock.json` | Break period with `no_break_exceptions` + `day_exceptions` |
+| `mocks/requests/required_joint_periods_mock.json` | Locked course periods (required_joint_course_periods) |
+| `mocks/requests/soft_constraints_mock.json` | Soft constraints (teacher max hours, course requested slots, requested free period) |
+
+- **In Swagger**: Open http://localhost:8080/docs → try an endpoint → paste the contents of any file above into the request body.
+- **With curl**: `curl -X POST http://localhost:8080/api/v1/schedule/without-preference -H "Content-Type: application/json" -d @mocks/requests/minimal_valid.json`
+
+See `mocks/requests/README.md` for details and more curl examples.
+
 ## 🎯 API Modes
 
 This API supports two scheduling modes:
@@ -216,6 +231,7 @@ See `api-details/response.json` for a complete example.
 
 ```json
 {
+  "status": "OPTIMAL",
   "timetable": [
     {
       "day": "Monday",
@@ -242,21 +258,27 @@ See `api-details/response.json` for a complete example.
       ]
     }
   ],
-  "messages": {
-    "error_message": []
+  "diagnostics": {
+    "constraints": { "hard": [], "soft": [] },
+    "summary": {
+      "message": "All constraints satisfied.",
+      "hard_constraints_met": true,
+      "soft_constraints_met": true,
+      "failed_soft_constraints_count": 0,
+      "failed_hard_constraints_count": 0
+    }
   },
-  "status": "OPTIMAL",
-  "solve_time_seconds": 2.5
+  "metadata": { "solve_time_seconds": 2.5 },
+  "messages": { "error_message": [] }
 }
 ```
 
 ### Status Values
 
-- `OPTIMAL` - Found best possible solution
-- `FEASIBLE` - Found valid solution (may not be optimal)
-- `INFEASIBLE` - No valid schedule exists with given constraints
-- `TIMEOUT` - Solver time limit exceeded
-- `ERROR` - Unexpected error occurred
+- `OPTIMAL` - All hard and soft constraints satisfied
+- `PARTIAL` - All hard constraints met; one or more soft constraints not met (timetable valid, see `diagnostics.constraints.soft`)
+- `ERROR` - One or more hard constraints not satisfied (see `diagnostics.constraints.hard`)
+- Responses include `diagnostics` (constraints.hard / constraints.soft, summary) and `metadata.solve_time_seconds` per the functional spec.
 
 ## 🏗️ Architecture
 
@@ -297,48 +319,30 @@ ORToolsScheduler(
 
 The solver uses a fixed random seed (42) and single-threaded search to ensure identical inputs produce identical outputs.
 
-## ⚠️ Current Implementation Status
+## ⚠️ Implementation Status
 
 ### ✅ Completed
 - [x] Complete schema rewrite matching API contract
-- [x] Request/Response models with nested structures
-- [x] Two versioned API endpoints
-- [x] OR-Tools solver scaffolding
+- [x] Request/Response models with nested structures; diagnostics (hard/soft), summary, metadata
+- [x] Two versioned API endpoints (with-preference / without-preference)
+- [x] OR-Tools solver: variables, hard constraints, solve, solution extraction
 - [x] Operational period parsing (per-day configuration)
-- [x] Break period configuration
-- [x] Time slot generation
+- [x] Break period (including `no_break_exceptions`, `day_exceptions`); break slots in output
+- [x] Time slot generation with 15-minute alignment
 - [x] Input validation
 - [x] Course type → Hall type matching
-- [x] Basic test suite
+- [x] **Hard constraints:** course frequency, no teacher/hall double-booking, teacher/hall busy blocking, break blocking, required_joint_course_periods
+- [x] **Soft constraints (post-solve):** teacher_max_daily_hours, teacher_max_weekly_hours, schedule_max_periods_per_day, schedule_max_free_periods_per_day, course_max_daily_frequency, course_requested_time_slots, teacher_requested_time_windows, hall_requested_time_windows, requested_assignments, requested_free_periods
+- [x] Teacher preference matching (weighted objective for with-preference endpoint)
+- [x] Solution extraction: map variables to slots, durations, group by day, include break slots
+- [x] Status OPTIMAL / PARTIAL / ERROR and diagnostic format per functional spec
+- [x] Test suite and mocks/requests for Swagger and curl testing
 
-### 🚧 In Progress (TODO)
-- [ ] **Complete hard constraints implementation**
-  - [ ] Course frequency constraints (sessions per week)
-  - [ ] No teacher double-booking
-  - [ ] No hall double-booking
-  - [ ] Teacher busy period blocking
-  - [ ] Hall busy period blocking
-  - [ ] Break period slot blocking
-  
-- [ ] **Complete soft constraints implementation** (30+ constraints)
-  - [ ] Teacher preference matching (weighted objective)
-  - [ ] Load balancing across days/weeks
-  - [ ] Consecutive class limits
-  - [ ] Gap minimization
-  - [ ] Heavy subject distribution
-  - [ ] All constraints from `timetable_constraints.md`
-
-- [ ] **Solution extraction**
-  - [ ] Map CP-SAT variables to schedule slots
-  - [ ] Calculate human-readable durations
-  - [ ] Group slots by day
-  - [ ] Include break slots in output
-
-- [ ] **Advanced features**
-  - [ ] Student class/group support
-  - [ ] Multi-class scheduling
-  - [ ] Partial solution hints (warm-start)
-  - [ ] Solution quality metrics
+### 🔲 Optional / Future
+- [ ] Operational period / period duration: accept doc names `day_exceptions`, `duration_minutes` in request (in addition to current schema)
+- [ ] Hall busy periods: add `day` field for per-day unavailability
+- [ ] Additional soft constraints (e.g. consecutive class limits, gap minimization) if required
+- [ ] Student class/group support, multi-class scheduling, warm-start, solution quality metrics
 
 ## 🧪 Testing
 
@@ -363,20 +367,18 @@ pytest tests/ --cov=. --cov-report=html
 
 ## 🐛 Known Issues & Limitations
 
-1. **Incomplete constraint implementation** - Many hard and soft constraints are scaffolded but not yet implemented in the OR-Tools model
-2. **No student group modeling** - Current API doesn't include student class/section data
-3. **Session duration calculation** - Needs refinement based on `course_hours` and semester length
-4. **Performance optimization** - Variable creation can be optimized with better filtering
+1. **No student group modeling** - Current API doesn't include student class/section data
+2. **Session duration calculation** - Sessions per week derived from `course_credit`; can be refined using `course_hours` and semester length
+3. **Performance** - Variable creation and filtering can be optimized for very large instances
 
 ## 🤝 Contributing
 
-This is an active development project. Key areas needing work:
+Possible next steps:
 
-1. Complete the hard constraint implementation in `_add_hard_constraints()`
-2. Implement soft constraints in `_add_soft_constraints_and_objective()`
-3. Complete solution extraction in `_extract_solution()`
-4. Add more comprehensive test cases
-5. Optimize variable creation and filtering
+1. Add optional request fields for doc-style naming (`day_exceptions`, `duration_minutes`) where applicable
+2. Extend soft constraints (e.g. consecutive limits, gap minimization) if product requires them
+3. Add more test cases using `mocks/requests/` and assert diagnostic shapes against `mocks/diagnostics/`
+4. Optimize solver for large schools (many teachers, halls, courses)
 
 ## 📝 License
 
