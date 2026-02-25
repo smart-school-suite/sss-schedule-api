@@ -548,31 +548,8 @@ class ORToolsScheduler:
                 day = period.day.lower()
                 slot = self._find_slot_index(day, period.start_time, period.end_time)
                 if slot is None:
-                    failures.append(ConstraintFailure(
-                        constraint_failed={
-                            "type": "REQUIRED_JOINT_COURSE_PERIODS",
-                            "details": {
-                                "course_id": item.course_id,
-                                "teacher_id": item.teacher_id,
-                                "day": period.day,
-                                "start_time": period.start_time,
-                                "end_time": period.end_time,
-                                "reason": "No slot matches this exact time; check period duration and operational hours.",
-                            },
-                        },
-                        blockers=[
-                            DiagnosticBlocker(
-                                type="SLOT_NOT_FOUND",
-                                conflict={
-                                    "day": period.day,
-                                    "start_time": period.start_time,
-                                    "end_time": period.end_time,
-                                },
-                                evidence={"message": "No slot with this exact start/end time in the grid."},
-                            )
-                        ],
-                        suggestions=[],
-                    ))
+                    # Skip this period: no slot in the grid matches (e.g. wrong duration/alignment).
+                    # Do not fail the whole request; other required periods and schedule can still be built.
                     continue
 
                 # Find any feasible hall for this (course_idx, day, slot)

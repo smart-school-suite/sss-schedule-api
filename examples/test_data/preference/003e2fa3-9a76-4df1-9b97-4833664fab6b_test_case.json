@@ -1,0 +1,643 @@
+{
+    "teachers": [
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "teacher_name": "Jeff Mills"
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "teacher_name": "Jonathan Haley"
+        }
+    ],
+    "teacher_courses": [
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "c9624b92-1292-4de9-9722-9946713c0f7d",
+            "course_name": "Est Ipsam Blanditiis Quo",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "143d1f99-8136-47ac-b6ba-b4d783168d41",
+            "course_name": "Placeat Corrupti",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "e0daad65-bfc5-40ec-b926-f2aabb927304",
+            "course_name": "Quas A Placeat Magni Unde",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "8887f39e-dd5c-4039-b553-2967b8d05b25",
+            "course_name": "Sunt Corporis Qui Autem Quae",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "32b08f02-4162-4cc9-93b9-715649b41f65",
+            "course_name": "Atque Laudantium Et Impedit",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "23c95458-b595-44b2-8c62-a88fdc68fb25",
+            "course_name": "Ea Ut",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "cda7d09b-8ad8-420a-9069-5c1cf2dc91b3",
+            "course_name": "Qui Architecto Hic",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "ee869232-ebb8-443e-9ee4-c92d3a7f1385",
+            "course_name": "Mollitia Sit Molestiae",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "7d5c0920-8506-42b9-9e0e-f4d0ae5915ec",
+            "course_name": "Et Aperiam Iste",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "6465fce9-a5eb-48fe-af13-b14f391f3b41",
+            "course_name": "Ipsum Qui Numquam Nihil Temporibus",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "ea29daaa-9206-44ce-948a-961d5ad17902",
+            "course_name": "Rerum Et",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "b1fcfda0-88b0-415c-b2de-31483a24749b",
+            "course_name": "Veritatis Fugiat Eos Facere",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "aa662953-5ad6-4ded-9b0c-46f8613d5af7",
+            "course_name": "Ullam Nisi Officia Est",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "b681ee9a-54aa-48c1-aa67-fa30d21e069a",
+            "course_name": "Optio Omnis Ut",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "c6fdfa60-1d3d-4d0d-ba2a-b2b2be3ec2bb",
+            "course_name": "Dolor Reprehenderit Provident Esse",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "9b19224e-702a-4c77-a3f7-9d61e8056fb4",
+            "course_name": "Illum Velit Ex",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "f27c5e20-de20-44c7-b268-1168bb4df978",
+            "course_name": "Dolorem Possimus",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "course_id": "3bbc4a98-844b-4619-8f66-b37f3bae7303",
+            "course_name": "Officia Harum Cupiditate Inventore",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "b3729eda-f7f2-437f-af47-0ae146e25763",
+            "course_name": "Neque Fugiat Voluptates",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "f526e87b-c4a7-4339-abf4-4707a6267ea7",
+            "course_name": "Nobis Non",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "83bed2e3-7a45-4c19-a475-84a165225c67",
+            "course_name": "Aperiam Aut Labore Similique Ea",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "4fe36a86-2521-4000-8e19-3d7ac2496dd9",
+            "course_name": "Atque Itaque Sequi Non In",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "d30cd225-87fc-4496-ad3e-feb2e1572115",
+            "course_name": "Dignissimos Non Exercitationem Consequatur",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "ad13c7b4-3d1c-4fee-8662-495bcc6f095d",
+            "course_name": "Aut Occaecati Fugiat",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "0acb7147-4e57-4118-ba1c-4cb05173b1aa",
+            "course_name": "Est Cum Quia Voluptatem",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "e2fb1879-9a4d-4b03-951e-04272eef462a",
+            "course_name": "Deserunt Porro Suscipit",
+            "course_type": []
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "b4d24347-72a2-4c05-b4e3-3636f9df3469",
+            "course_name": "Ipsam Et Odio Ut Esse",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "course_id": "d65fc595-a3d1-4cff-a19d-aaf6f01c8366",
+            "course_name": "Qui Eos Quisquam Dolorum Sunt",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        }
+    ],
+    "teacher_busy_periods": [
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "day": "thursday",
+            "start_time": "17:00",
+            "end_time": "18:00"
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "day": "wednesday",
+            "start_time": "14:30",
+            "end_time": "15:30"
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "day": "monday",
+            "start_time": "18:00",
+            "end_time": "19:00"
+        },
+        {
+            "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+            "day": "wednesday",
+            "start_time": "10:30",
+            "end_time": "11:30"
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "day": "friday",
+            "start_time": "14:30",
+            "end_time": "15:30"
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "day": "saturday",
+            "start_time": "08:00",
+            "end_time": "09:00"
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "day": "sunday",
+            "start_time": "10:00",
+            "end_time": "11:00"
+        },
+        {
+            "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+            "day": "thursday",
+            "start_time": "14:00",
+            "end_time": "15:00"
+        }
+    ],
+    "halls": [
+        {
+            "hall_id": "40847c0f-2f62-4e5e-b985-a129b8666e1d",
+            "hall_name": "Amphitheatre",
+            "hall_capacity": 61,
+            "hall_type": [
+                "Practical"
+            ]
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "hall_name": "Microbiology Lab",
+            "hall_capacity": 21,
+            "hall_type": [
+                "Lecture Hall",
+                "Exam Hall"
+            ]
+        },
+        {
+            "hall_id": "488a5506-8f4a-4fb1-ae55-697b7c0f82de",
+            "hall_name": "Room 27",
+            "hall_capacity": 136,
+            "hall_type": [
+                "Lecture Hall",
+                "Practical"
+            ]
+        },
+        {
+            "hall_id": "de79d9fd-ad6b-4063-9562-ead904a0f68e",
+            "hall_name": "Network Lab 15",
+            "hall_capacity": 33,
+            "hall_type": [
+                "Lecture Hall",
+                "Exam Hall",
+                "Practical"
+            ]
+        },
+        {
+            "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+            "hall_name": "Hall B-47",
+            "hall_capacity": 67,
+            "hall_type": [
+                "Lecture Hall"
+            ]
+        },
+        {
+            "hall_id": "5868f55b-f56a-43b3-9e72-e2ed0b99cb4e",
+            "hall_name": "Hall D-97",
+            "hall_capacity": 65,
+            "hall_type": [
+                "Practical"
+            ]
+        }
+    ],
+    "hall_busy_periods": [
+        {
+            "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+            "day": "thursday",
+            "start_time": "18:00",
+            "end_time": "19:00"
+        },
+        {
+            "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+            "day": "tuesday",
+            "start_time": "13:00",
+            "end_time": "14:00"
+        },
+        {
+            "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+            "day": "saturday",
+            "start_time": "14:30",
+            "end_time": "15:30"
+        },
+        {
+            "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+            "day": "wednesday",
+            "start_time": "14:30",
+            "end_time": "15:30"
+        },
+        {
+            "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+            "day": "wednesday",
+            "start_time": "08:00",
+            "end_time": "09:00"
+        },
+        {
+            "hall_id": "40847c0f-2f62-4e5e-b985-a129b8666e1d",
+            "day": "tuesday",
+            "start_time": "14:00",
+            "end_time": "15:00"
+        },
+        {
+            "hall_id": "40847c0f-2f62-4e5e-b985-a129b8666e1d",
+            "day": "friday",
+            "start_time": "14:00",
+            "end_time": "15:00"
+        },
+        {
+            "hall_id": "5868f55b-f56a-43b3-9e72-e2ed0b99cb4e",
+            "day": "thursday",
+            "start_time": "07:00",
+            "end_time": "08:00"
+        },
+        {
+            "hall_id": "5868f55b-f56a-43b3-9e72-e2ed0b99cb4e",
+            "day": "tuesday",
+            "start_time": "12:00",
+            "end_time": "13:00"
+        },
+        {
+            "hall_id": "5868f55b-f56a-43b3-9e72-e2ed0b99cb4e",
+            "day": "tuesday",
+            "start_time": "10:00",
+            "end_time": "11:00"
+        },
+        {
+            "hall_id": "5868f55b-f56a-43b3-9e72-e2ed0b99cb4e",
+            "day": "thursday",
+            "start_time": "18:30",
+            "end_time": "19:30"
+        },
+        {
+            "hall_id": "5868f55b-f56a-43b3-9e72-e2ed0b99cb4e",
+            "day": "monday",
+            "start_time": "18:30",
+            "end_time": "19:30"
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "day": "tuesday",
+            "start_time": "11:30",
+            "end_time": "12:30"
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "day": "friday",
+            "start_time": "08:00",
+            "end_time": "09:00"
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "day": "thursday",
+            "start_time": "12:00",
+            "end_time": "13:00"
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "day": "wednesday",
+            "start_time": "14:30",
+            "end_time": "15:30"
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "day": "friday",
+            "start_time": "18:00",
+            "end_time": "19:00"
+        },
+        {
+            "hall_id": "f1da0205-a0a1-4a27-9f5c-4e471a2ddea9",
+            "day": "monday",
+            "start_time": "08:00",
+            "end_time": "09:00"
+        }
+    ],
+    "hard_constraints": {
+        "operational_period": {
+            "start_time": "08:30",
+            "end_time": "17:30",
+            "day_exceptions": [
+                {
+                    "day": "thursday",
+                    "start_time": "07:00",
+                    "end_time": "17:00"
+                },
+                {
+                    "day": "friday",
+                    "start_time": "07:00",
+                    "end_time": "19:00"
+                },
+                {
+                    "day": "tuesday",
+                    "start_time": "06:00",
+                    "end_time": "20:00"
+                }
+            ],
+            "operational_days": [
+                "friday",
+                "monday",
+                "saturday",
+                "sunday",
+                "thursday",
+                "tuesday",
+                "wednesday"
+            ]
+        },
+        "break_period": {
+            "start_time": "13:30",
+            "end_time": "14:15",
+            "day_exceptions": [],
+            "no_break_exceptions": [
+                "wednesday"
+            ]
+        },
+        "schedule_period_duration_minutes": {
+            "duration_minutes": 60,
+            "day_exceptions": []
+        },
+        "required_joint_course_periods": []
+    },
+    "soft_constraints": {
+        "teacher_max_daily_hours": {
+            "max_hours": 8,
+            "teacher_exceptions": []
+        },
+        "teacher_max_weekly_hours": {
+            "max_hours": 20,
+            "teacher_exceptions": [
+                {
+                    "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+                    "max_hours": 30
+                },
+                {
+                    "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+                    "max_hours": 38
+                }
+            ]
+        },
+        "schedule_max_periods_per_day": {
+            "max_periods": 9,
+            "day_exceptions": []
+        },
+        "schedule_max_free_periods_per_day": {
+            "max_free_periods": 3,
+            "day_exceptions": [
+                {
+                    "day": "thursday",
+                    "max_free_periods": 1
+                },
+                {
+                    "day": "wednesday",
+                    "max_free_periods": 4
+                },
+                {
+                    "day": "monday",
+                    "max_free_periods": 0
+                }
+            ]
+        },
+        "course_max_daily_frequency": {
+            "max_frequency": 4,
+            "course_exceptions": [
+                {
+                    "course_id": "1ec2d7ad-d432-4e7a-bd2a-cfaacf9275b6",
+                    "max_frequency": 2
+                },
+                {
+                    "course_id": "93572ec6-afe6-4d8b-b2a3-51f076d4c5c3",
+                    "max_frequency": 1
+                },
+                {
+                    "course_id": "aabcfdaa-50e6-44a2-85b3-a61233647bc3",
+                    "max_frequency": 3
+                },
+                {
+                    "course_id": "1ebfd9d8-126b-46c7-95f0-7a6dbb5b5764",
+                    "max_frequency": 1
+                },
+                {
+                    "course_id": "7980f3dd-2cfd-4685-a4aa-5616df95835c",
+                    "max_frequency": 2
+                }
+            ]
+        },
+        "course_requested_time_slots": [],
+        "requested_assignments": [
+            {
+                "course_id": "143d1f99-8136-47ac-b6ba-b4d783168d41",
+                "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+                "hall_id": "40847c0f-2f62-4e5e-b985-a129b8666e1d",
+                "start_time": "09:00",
+                "end_time": "11:00"
+            }
+        ],
+        "hall_requested_time_windows": [
+            {
+                "hall_id": "40847c0f-2f62-4e5e-b985-a129b8666e1d",
+                "requested_time_windows": [
+                    {
+                        "day": "sunday",
+                        "start_time": "14:00",
+                        "end_time": "18:00"
+                    },
+                    {
+                        "day": "saturday"
+                    }
+                ]
+            },
+            {
+                "hall_id": "19e99213-ed35-46a0-b772-f08c637fac4d",
+                "requested_time_windows": [
+                    {
+                        "day": "friday",
+                        "start_time": "10:00",
+                        "end_time": "13:00"
+                    }
+                ]
+            }
+        ],
+        "teacher_requested_time_windows": [
+            {
+                "teacher_id": "080d7045-efa4-46fa-8571-5dada79f6a29",
+                "requested_time_windows": [
+                    {
+                        "day": "sunday"
+                    },
+                    {
+                        "day": "wednesday"
+                    }
+                ]
+            },
+            {
+                "teacher_id": "da29d184-2b18-4c38-8449-19e2dee9fb1a",
+                "requested_time_windows": [
+                    {
+                        "start_time": "08:00",
+                        "end_time": "10:00"
+                    },
+                    {
+                        "start_time": "10:00",
+                        "end_time": "12:00"
+                    },
+                    {
+                        "start_time": "15:00",
+                        "end_time": "17:00"
+                    }
+                ]
+            }
+        ],
+        "requested_free_periods": [
+            {
+                "day": "sunday"
+            }
+        ]
+    }
+}
