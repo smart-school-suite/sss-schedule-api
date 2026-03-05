@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "requested_assignments",
+    "constraint": "requested_assignments",
     "details": {
       "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
       "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
@@ -266,14 +266,14 @@
       }
     },
     {
-      "type": "MAX_DAILY_PERIODS_EXCEEDED",
+      "type": "max_daily_period_violation",
       "entity": {
-        "type": "daily_periods",
-        "day": "Monday",
+        "type": "schedule_max_periods_per_day",
+        "day": "monday",
         "max_periods": 5
       },
       "conflict": {
-        "day": "Monday",
+        "day": "monday",
         "current_periods": 6
       },
       "evidence": {
@@ -356,33 +356,38 @@
       }
     }
   ],
-  "suggestions": [
-    {
-      "constraint": "teacher_max_weekly_hours",
-      "suggested_changes": [
-        {
-          "max_hours": 22
-        }
-      ]
+  "suggestions": {
+    "constraint_modification": {
+      "constraint": "requested_assignments",
+      "current_value": {
+        "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "day": "monday"
+      },
+      "suggested_value": {
+        "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+        "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "day": "monday"
+      }
     },
-    {
-      "constraint": "teacher_max_daily_hours",
-      "suggested_changes": [
-        {
+    "violation_resolver": [
+      {
+        "violation": "max_daily_period_violation",
+        "entity": {
+          "type": "schedule_max_periods_per_day",
           "day": "monday",
-          "max_hours": 6
+          "max_periods": 5
+        },
+        "suggested_values": {
+          "max_periods": 4
         }
-      ]
-    },
-    {
-      "constraint": "operational_period",
-      "suggested_changes": [
-        {
-          "day": "monday",
-          "start_time": "07:00",
-          "end_time": "17:00"
-        }
-      ]
-    }
-  ]
+      }
+    ]
+  }
 }

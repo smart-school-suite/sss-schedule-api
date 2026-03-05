@@ -79,10 +79,10 @@
     "halls": [
         {
             "hall_id": "h1a2b3c4-d5e6-7890-abcd-ef1234567890",
-            "hall_name": "Main Lecture Hall A",
+            "hall_name": "Main lecture Hall A",
             "capacity": 250,
             "hall_type": [
-                "Lecture"
+                "lecture"
             ]
         },
         {
@@ -90,7 +90,7 @@
             "hall_name": "Advanced Computing Lab",
             "capacity": 45,
             "hall_type": [
-                "Practical"
+                "practical"
             ]
         },
         {
@@ -98,7 +98,7 @@
             "hall_name": "Grand Amphitheater",
             "capacity": 500,
             "hall_type": [
-                "Lecture"
+                "lecture"
             ]
         },
         {
@@ -106,14 +106,14 @@
             "hall_name": "Physics Seminar Room",
             "capacity": 30,
             "hall_type": [
-                "Lecture"
+                "lecture"
             ]
         }
     ],
     "hall_busy_periods": [
         {
             "hall_id": "h1a2b3c4-d5e6-7890-abcd-ef1234567890",
-            "hall_name": "Main Lecture Hall A",
+            "hall_name": "Main lecture Hall A",
             "start_time": "10:00",
             "end_time": "12:00",
             "day": "monday"

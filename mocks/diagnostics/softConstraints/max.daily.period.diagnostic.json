@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "schedule_max_periods_per_day",
+    "constraint": "schedule_max_periods_per_day",
     "details": {
       "day": "monday",
       "max_periods": 5

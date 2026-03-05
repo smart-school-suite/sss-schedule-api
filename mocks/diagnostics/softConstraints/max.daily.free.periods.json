@@ -1,6 +1,6 @@
 {
   "constraint_failed": {
-    "type": "schedule_max_free_periods_per_day",
+    "constraint": "schedule_max_free_periods_per_day",
     "details": {
       "max_free_periods": 1,
       "day": "monday"
@@ -8,7 +8,7 @@
   },
   "blockers": [
     {
-      "type": "OPERATIONAL_PERIOD_VIOLATION",
+      "type": "operational_period_violation",
       "entity": {
         "type": "operational_period",
         "slots": [

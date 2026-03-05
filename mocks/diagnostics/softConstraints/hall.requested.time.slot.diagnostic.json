@@ -1,6 +1,6 @@
 {
     "constraint_failed": {
-        "type": "hall_requested_time_windows",
+        "constraint": "hall_requested_time_windows",
         "details": {
             "hall_id": "550e8400-e29b-41d4-a716-446655440000",
             "day": "friday",
@@ -210,25 +210,25 @@
             }
         }
     ],
-  "suggestions": [
-    {
-      "constraint": "schedule_max_free_periods_per_day",
-      "suggested_changes": [
+    "suggestions": [
         {
-          "day": "monday",
-          "max_free_periods":2
-        }
-      ]
-    },
-    {
-      "constraint": "operational_period",
-      "suggested_changes": [
+            "constraint": "schedule_max_free_periods_per_day",
+            "suggested_changes": [
+                {
+                    "day": "monday",
+                    "max_free_periods": 2
+                }
+            ]
+        },
         {
-          "day": "monday",
-          "start_time": "07:00",
-          "end_time": "17:00"
+            "constraint": "operational_period",
+            "suggested_changes": [
+                {
+                    "day": "monday",
+                    "start_time": "07:00",
+                    "end_time": "17:00"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

@@ -1,6 +1,6 @@
 {
     "constraint_failed": {
-        "type": "requested_free_periods",
+        "constraint": "requested_free_periods",
         "details": {
             "day": "monday",
             "start_time": "11:00",
