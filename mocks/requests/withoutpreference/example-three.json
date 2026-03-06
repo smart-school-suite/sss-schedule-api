@@ -1,0 +1,285 @@
+{
+    "teachers": [
+        {
+            "teacher_id": "b6c9a2d1-1f3e-4a7b-8d5c-2e9f6a1b3c7d",
+            "teacher_name": "Tambe Ngassam Njikam"
+        },
+        {
+            "teacher_id": "2a7e1c9b-5d3f-4b6a-9c8e-1f2d3a6b7c9e",
+            "teacher_name": "Ebangha Mbah Ndziokou"
+        },
+        {
+            "teacher_id": "9d1f3a7b-2c6e-4a8d-b5c1-7e9a2b3c6d1f",
+            "teacher_name": "Fonkoua Ndziwe Nchoutpouen"
+        }
+    ],
+    "teacher_courses": [
+        {
+            "teacher_id": "b6c9a2d1-1f3e-4a7b-8d5c-2e9f6a1b3c7d",
+            "course_id": "4f2a6b1c-9d3e-4a7b-8c1d-2e9f6a3b7c5d",
+            "course_name": "Introduction to Programming (Python)",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "b6c9a2d1-1f3e-4a7b-8d5c-2e9f6a1b3c7d",
+            "course_id": "c7d1a3b5-2e9f-4c6a-8b1d-3e7f2a9c4d6b",
+            "course_name": "Programming Fundamentals Lab",
+            "course_type": [
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "2a7e1c9b-5d3f-4b6a-9c8e-1f2d3a6b7c9e",
+            "course_id": "1e3f5a7b-9c2d-4b6a-8e1f-3c5d7a9b2d4e",
+            "course_name": "Discrete Mathematics for Software Engineering",
+            "course_type": [
+                "Theoritical"
+            ]
+        },
+        {
+            "teacher_id": "2a7e1c9b-5d3f-4b6a-9c8e-1f2d3a6b7c9e",
+            "course_id": "8a2c6e1f-4b7d-4a9c-b3e5-1f6a2c7d9b4e",
+            "course_name": "Computer Systems & Linux Basics",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "9d1f3a7b-2c6e-4a8d-b5c1-7e9a2b3c6d1f",
+            "course_id": "5b7d1a3c-6e9f-4a2c-8d1b-7c3e5a9f2d6b",
+            "course_name": "Web Development Fundamentals (HTML/CSS/JS)",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        },
+        {
+            "teacher_id": "9d1f3a7b-2c6e-4a8d-b5c1-7e9a2b3c6d1f",
+            "course_id": "d2c4e6a8-1f3b-4d5c-9a7e-2b6c8d1f3a5e",
+            "course_name": "Introduction to Databases (SQL)",
+            "course_type": [
+                "Theoritical",
+                "Practical"
+            ]
+        }
+    ],
+    "teacher_busy_periods": [],
+    "halls": [
+        {
+            "hall_id": "a4bda011-7eb9-4b12-a88a-56840f8a9ed0",
+            "hall_name": "Hall B",
+            "hall_capacity": 62,
+            "hall_type": [
+                "Lecture Hall",
+                "Exam Hall",
+                "Practical"
+            ]
+        },
+        {
+            "hall_id": "49e23d5d-c5ce-48cf-914d-065936fb3963",
+            "hall_name": "Hall A",
+            "hall_capacity": 121,
+            "hall_type": [
+                "Lecture Hall",
+                "Practical"
+            ]
+        }
+    ],
+    "hall_busy_periods": [],
+    "hard_constraints": {
+        "operational_period": {
+            "start_time": "08:00",
+            "end_time": "15:00",
+            "day_exceptions": [
+                {
+                    "day": "saturday",
+                    "start_time": "08:00",
+                    "end_time": "12:00"
+                }
+            ],
+            "operational_days": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday"
+            ]
+        },
+        "break_period": {
+            "start_time": "11:00",
+            "end_time": "12:00",
+            "day_exceptions": [
+                {
+                    "day": "monday",
+                    "start_time": "12:00",
+                    "end_time": "12:30"
+                },
+                {
+                    "day": "thursday",
+                    "start_time": "13:00",
+                    "end_time": "13:30"
+                }
+            ],
+            "no_break_exceptions": [
+                "saturday",
+                "monday"
+            ]
+        },
+        "schedule_period_duration_minutes": {
+            "duration_minutes": 60
+        },
+        "required_joint_course_periods": [
+            {
+                "course_id": "a38a2e7c-0e1a-4230-8528-dec79913ba46",
+                "teacher_id": "15b26fe6-d3d5-4102-834d-7af052cad316",
+                "periods": [
+                    {
+                        "day": "monday",
+                        "start_time": "13:00",
+                        "end_time": "14:00",
+                        "hall_id": "2bde6318-976d-4c1e-a3d1-fd350ad82dd8"
+                    },
+                    {
+                        "day": "thursday",
+                        "start_time": "14:00",
+                        "end_time": "15:00",
+                        "hall_id": "28b73dce-d113-4220-90dc-eb05c766fd0e"
+                    }
+                ]
+            }
+        ]
+    },
+    "soft_constraints": {
+        "teacher_max_daily_hours": {
+            "max_hours": 6
+        },
+        "teacher_max_weekly_hours": {
+            "max_hours": 30
+        },
+        "schedule_max_periods_per_day": {
+            "max_periods": 6
+        },
+        "schedule_max_free_periods_per_day": {
+            "max_free_periods": 4,
+            "day_exceptions": []
+        },
+        "course_max_daily_frequency": {
+            "max_frequency": 2
+        },
+        "course_requested_time_slots": [
+            {
+                "course_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+                "slots": [
+                    {
+                        "day": "monday"
+                    },
+                    {
+                        "day": "wednesday",
+                        "start_time": "14:00",
+                        "end_time": "15:30"
+                    },
+                    {
+                        "start_time": "14:00",
+                        "end_time": "15:00"
+                    },
+                    {
+                        "end_time": "14:00"
+                    }
+                ]
+            }
+        ],
+        "requested_assignments": [
+            {
+                "teacher_id": "b6c9a2d1-1f3e-4a7b-8d5c-2e9f6a1b3c7d",
+                "course_id": "4f2a6b1c-9d3e-4a7b-8c1d-2e9f6a3b7c5d",
+                "hall_id": "49e23d5d-c5ce-48cf-914d-065936fb3963",
+                "day": "monday",
+                "start_time": "09:00",
+                "end_time": "10:30"
+            },
+            {
+                "teacher_id": "2a7e1c9b-5d3f-4b6a-9c8e-1f2d3a6b7c9e",
+                "course_id": "1e3f5a7b-9c2d-4b6a-8e1f-3c5d7a9b2d4e",
+                "hall_id": "a4bda011-7eb9-4b12-a88a-56840f8a9ed0",
+                "day": "monday"
+            },
+            {
+                "start_time": "08:00",
+                "end_time": "10:30",
+                "teacher_id": "9d1f3a7b-2c6e-4a8d-b5c1-7e9a2b3c6d1f",
+                "course_id": "d2c4e6a8-1f3b-4d5c-9a7e-2b6c8d1f3a5e",
+                "hall_id": "49e23d5d-c5ce-48cf-914d-065936fb3963"
+            }
+        ],
+        "hall_requested_time_windows": [
+            {
+                "hall_id": "49e23d5d-c5ce-48cf-914d-065936fb3963",
+                "windows": [
+                    {
+                        "day": "monday",
+                        "start_time": "08:00",
+                        "end_time": "18:00"
+                    },
+                    {
+                        "day": "tuesday",
+                        "start_time": "08:00",
+                        "end_time": "18:00"
+                    },
+                    {
+                        "day": "friday"
+                    },
+                    {
+                        "start_time": "14:00",
+                        "end_time": "15:00"
+                    }
+                ]
+            }
+        ],
+        "teacher_requested_time_windows": [
+            {
+                "teacher_id": "2a7e1c9b-5d3f-4b6a-9c8e-1f2d3a6b7c9e",
+                "windows": [
+                    {
+                        "day": "monday",
+                        "start_time": "08:00",
+                        "end_time": "12:00"
+                    },
+                    {
+                        "day": "wednesday",
+                        "start_time": "13:00",
+                        "end_time": "17:00"
+                    },
+                    {
+                        "day": "friday"
+                    },
+                    {
+                        "start_time": "14:00",
+                        "end_time": "15:00"
+                    }
+                ]
+            }
+        ],
+        "requested_free_periods": [
+            {
+                "day": "monday",
+                "start_time": "13:00",
+                "end_time": "14:00"
+            },
+            {
+                "day": "tuesday"
+            },
+            {
+                "start_time": "14:00",
+                "end_time": "15:00"
+            },
+            {
+                "end_time": "14:00"
+            }
+        ]
+    }
+}

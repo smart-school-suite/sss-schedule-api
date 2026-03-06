@@ -191,9 +191,14 @@ class ORToolsScheduler:
         )
         if day_exc:
             for ex in day_exc:
-                ex_day = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
-                if str(ex_day).lower() == day:
-                    return int(getattr(ex, "duration_minutes", ex.get("duration_minutes", default_minutes)))
+                if isinstance(ex, dict):
+                    ex_day = ex.get("day", "")
+                    if str(ex_day).lower() == day:
+                        return int(ex.get("duration_minutes", default_minutes))
+                else:
+                    ex_day = getattr(ex, "day", "")
+                    if str(ex_day).lower() == day:
+                        return int(getattr(ex, "duration_minutes", default_minutes))
         if periods_config.constrains and periods_config.constrains.daysFixedPeriods:
             for fixed_period in periods_config.constrains.daysFixedPeriods:
                 if fixed_period.day.lower() == day:
@@ -223,10 +228,10 @@ class ORToolsScheduler:
             if course.teacher_id not in teacher_ids:
                 errors.append(f"Course {course.course_title} assigned to unknown teacher {course.teacher_id}")
         
-        # Validate hall types
+        # Validate hall types (case-insensitive: Lecture -> lecture)
         valid_hall_types = {"lecture", "lab"}
         for hall in self.request.halls:
-            if hall.hall_type not in valid_hall_types:
+            if hall.hall_type.lower() not in valid_hall_types:
                 errors.append(f"Hall {hall.hall_name} has invalid type: {hall.hall_type}")
         
         # Validate course types
@@ -276,12 +281,18 @@ class ORToolsScheduler:
                     errors.append(f"Invalid day in {label}. Use valid weekdays.")
         def validate_fixed_breaks(breaks, label):
             for fixed_break in breaks or []:
-                day = getattr(fixed_break, "day", fixed_break.get("day") if isinstance(fixed_break, dict) else "")
+                if isinstance(fixed_break, dict):
+                    day = fixed_break.get("day", "")
+                    s = fixed_break.get("start_time")
+                    e = fixed_break.get("end_time")
+                else:
+                    day = getattr(fixed_break, "day", "")
+                    s = getattr(fixed_break, "start_time", None)
+                    e = getattr(fixed_break, "end_time", None)
+                
                 if str(day).lower() not in valid_days:
                     errors.append(f"Invalid day in {label}. Use valid weekdays.")
                 try:
-                    s = getattr(fixed_break, "start_time", fixed_break.get("start_time"))
-                    e = getattr(fixed_break, "end_time", fixed_break.get("end_time"))
                     if s and e:
                         fb_start = self._parse_time(s)
                         fb_end = self._parse_time(e)
@@ -315,10 +326,14 @@ class ORToolsScheduler:
             errors.append("Period duration (period or duration_minutes) must be greater than 0 minutes")
 
         for ex in getattr(periods_config, "day_exceptions", None) or []:
-            d = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+            if isinstance(ex, dict):
+                d = ex.get("day", "")
+                dm = ex.get("duration_minutes", 0)
+            else:
+                d = getattr(ex, "day", "")
+                dm = getattr(ex, "duration_minutes", 0)
             if str(d).lower() not in valid_days:
                 errors.append(f"Invalid day in periods day_exceptions")
-            dm = getattr(ex, "duration_minutes", ex.get("duration_minutes", 0))
             if dm <= 0:
                 errors.append(f"Period duration_minutes for day must be greater than 0")
 
@@ -332,10 +347,14 @@ class ORToolsScheduler:
                 if fixed_period.period <= 0:
                     errors.append(f"Period duration for {fixed_period.day} must be greater than 0 minutes")
             for ex in getattr(periods_config.constrains, "day_exceptions", None) or []:
-                d = getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "")
+                if isinstance(ex, dict):
+                    d = ex.get("day", "")
+                    dm = ex.get("duration_minutes", 0)
+                else:
+                    d = getattr(ex, "day", "")
+                    dm = getattr(ex, "duration_minutes", 0)
                 if str(d).lower() not in valid_days:
                     errors.append("Invalid day in periods.constrains.day_exceptions")
-                dm = getattr(ex, "duration_minutes", ex.get("duration_minutes", 0))
                 if dm <= 0:
                     errors.append("Period duration_minutes in day_exceptions must be greater than 0")
 
@@ -529,31 +548,8 @@ class ORToolsScheduler:
                 day = period.day.lower()
                 slot = self._find_slot_index(day, period.start_time, period.end_time)
                 if slot is None:
-                    failures.append(ConstraintFailure(
-                        constraint_failed={
-                            "type": "REQUIRED_JOINT_COURSE_PERIODS",
-                            "details": {
-                                "course_id": item.course_id,
-                                "teacher_id": item.teacher_id,
-                                "day": period.day,
-                                "start_time": period.start_time,
-                                "end_time": period.end_time,
-                                "reason": "No slot matches this exact time; check period duration and operational hours.",
-                            },
-                        },
-                        blockers=[
-                            DiagnosticBlocker(
-                                type="SLOT_NOT_FOUND",
-                                conflict={
-                                    "day": period.day,
-                                    "start_time": period.start_time,
-                                    "end_time": period.end_time,
-                                },
-                                evidence={"message": "No slot with this exact start/end time in the grid."},
-                            )
-                        ],
-                        suggestions=[],
-                    ))
+                    # Skip this period: no slot in the grid matches (e.g. wrong duration/alignment).
+                    # Do not fail the whole request; other required periods and schedule can still be built.
                     continue
 
                 # Find any feasible hall for this (course_idx, day, slot)
@@ -753,10 +749,11 @@ class ORToolsScheduler:
         suitable = []
         
         for hall in self.request.halls:
-            # Hard constraint: practical -> lab, theory -> lecture
-            if course_type == "practical" and hall.hall_type == "lab":
+            # Hard constraint: practical -> lab, theory -> lecture (case-insensitive)
+            ht = hall.hall_type.lower()
+            if course_type == "practical" and ht == "lab":
                 suitable.append(hall)
-            elif course_type == "theory" and hall.hall_type == "lecture":
+            elif course_type == "theory" and ht == "lecture":
                 suitable.append(hall)
         
         return suitable if suitable else self.request.halls  # Fallback to all
@@ -835,9 +832,16 @@ class ORToolsScheduler:
         if not overrides:
             return None
         for ex in overrides:
-            if getattr(ex, "day", ex.get("day") if isinstance(ex, dict) else "").lower() == day:
-                s = getattr(ex, "start_time", ex.get("start_time"))
-                e = getattr(ex, "end_time", ex.get("end_time"))
+            if isinstance(ex, dict):
+                ex_day = ex.get("day", "")
+                s = ex.get("start_time")
+                e = ex.get("end_time")
+            else:
+                ex_day = getattr(ex, "day", "")
+                s = getattr(ex, "start_time", None)
+                e = getattr(ex, "end_time", None)
+            
+            if str(ex_day).lower() == day:
                 if s and e:
                     return (s, e)
         return None

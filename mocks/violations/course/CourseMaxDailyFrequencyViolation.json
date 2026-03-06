@@ -1,0 +1,26 @@
+    {
+        "type": "max_course_daily_frequency_violation",
+        "entity": {
+            "type": "max_course_daily_frequency",
+            "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "day": "wednesday",
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+            }
+        },
+        "evidence": [
+            {
+                "violated_daily_frequency_rule": {
+                    "day": "wednesday",
+                    "current_daily_count": 3,
+                    "attempted_add": 1,
+                    "total_after_add": 4,
+                    "max_allowed_per_day": 2
+                }
+            }
+        ]
+    }

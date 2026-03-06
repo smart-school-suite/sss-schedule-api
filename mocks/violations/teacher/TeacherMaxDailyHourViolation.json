@@ -1,0 +1,26 @@
+    {
+        "type": "max_teacher_daily_hours_violation",
+        "entity": {
+            "type": "teacher_max_daily_hours",
+            "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+            "max_daily_hours": 4
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "day": "wednesday",
+                "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+            }
+        },
+        "evidence": [
+            {
+                "violated_teacher_daily_hours_rule": {
+                    "day": "wednesday",
+                    "current_daily_hours": 4,
+                    "hours_if_scheduled": 5,
+                    "max_allowed_per_day": 4
+                }
+            }
+        ]
+    }

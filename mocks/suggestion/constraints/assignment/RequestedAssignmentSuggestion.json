@@ -1,0 +1,14 @@
+{
+    "constraint": "requested_assignments",
+    "entity": {
+        "type": "course",
+        "id": "C12"
+    },
+    "current_value": [
+        "MON_08_10"
+    ],
+    "suggested_value": [
+        "TUE_10_12",
+        "WED_14_16"
+    ]
+}

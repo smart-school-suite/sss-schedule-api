@@ -1,23 +1,20 @@
 {
-  "status": "ERROR",
-  "timetable": {
-    "timetable": [],
-    "diagnostic_error_pool": [],
-    "diagnostics": {
-      "constraints": {
-        "hard": [],
-        "soft": []
-      },
-      "summary": {
-        "message": "Unable to generate a valid timetable.",
-        "hard_constraints_met": false,
-        "soft_constraints_met": false,
-        "failed_soft_constraints_count": 100,
-        "failed_hard_constraints_count": 25
-      }
+  "status": "error",
+  "timetable": [],
+  "diagnostics": {
+    "constraints": {
+      "hard": [],
+      "soft": []
     },
-    "metadata": {
-      "solve_time_seconds": 0.09
+    "summary": {
+      "message": "Unable to generate a valid timetable due to hard constraint violations.",
+      "hard_constraints_met": false,
+      "soft_constraints_met": false,
+      "failed_soft_constraints_count": 0,
+      "failed_hard_constraints_count": 1
     }
+  },
+  "metadata": {
+    "solve_time_seconds": 0.09
   }
 }

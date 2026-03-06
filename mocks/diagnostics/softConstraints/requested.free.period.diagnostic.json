@@ -1,60 +1,109 @@
 {
-    "constraint_failed": {
-        "constraint": "requested_free_periods",
-        "details": {
-            "day": "monday",
-            "start_time": "11:00",
-            "end_time": "12:30"
+  "constraint_failed": {
+    "type": "REQUESTED_FREE_PERIODS",
+    "details": {
+      "requested_free_periods": [
+        {
+          "day": "Monday",
+          "start_time": "10:00",
+          "end_time": "11:00"
+        },
+        {
+          "day": "Friday",
+          "start_time": "14:00",
+          "end_time": "15:00"
         }
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "type": "SCHEDULE_CONFLICT",
+      "entity": {
+        "type": "TIME_SLOT",
+        "day": "Monday",
+        "start_time": "10:00",
+        "end_time": "11:00"
+      },
+      "conflict": {
+        "requested_free": true,
+        "actual_status": "OCCUPIED"
+      },
+      "evidence": {
+        "assigned_course": {
+          "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+          "course_name": "Advanced Mathematics",
+          "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+          "teacher_name": "Dr. John Doe",
+          "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+          "hall_name": "Lecture Hall A"
+        }
+      }
     },
-    "blockers": [
+    {
+      "type": "INSUFFICIENT_CAPACITY",
+      "entity": {
+        "type": "SCHEDULE_CAPACITY",
+        "day": "Friday"
+      },
+      "conflict": {
+        "required_course_hours": 8,
+        "available_hours_after_free_periods": 5,
+        "deficit": 3
+      },
+      "evidence": {
+        "operational_hours": {
+          "day": "Friday",
+          "start_time": "08:00",
+          "end_time": "17:00",
+          "total_hours": 9
+        },
+        "break_periods": {
+          "start_time": "12:00",
+          "end_time": "13:00",
+          "duration_hours": 1
+        },
+        "requested_free_periods": {
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "duration_hours": 1
+        },
+        "remaining_capacity": 7
+      }
+    }
+  ],
+  "suggestions": [
+    {
+      "action": "ADJUST_FREE_PERIOD",
+      "target": {
+        "day": "Monday",
+        "current_time": "10:00 - 11:00"
+      },
+      "alternative_slots": [
         {
-            "type": "BREAK_PERIOD_VIOLATION",
-            "conflict": {
-                "requested_slot": {
-                    "day": "monday",
-                    "start_time": "07:00",
-                    "end_time": "07:30"
-                }
-            },
-            "evidence": {
-                "break_periods": [
-                    {
-                        "day": "monday",
-                        "start_time": "07:00",
-                        "end_time": "08:00"
-                    }
-                ]
-            }
-        }
-    ],
-    "suggestions": [
-        {
-            "constraint": "teacher_max_weekly_hours",
-            "suggested_changes": [
-                {
-                    "max_hours": 22
-                }
-            ]
+          "day": "Monday",
+          "start_time": "15:00",
+          "end_time": "16:00"
         },
         {
-            "constraint": "teacher_max_daily_hours",
-            "suggested_changes": [
-                {
-                    "day": "monday",
-                    "max_hours": 6
-                }
-            ]
-        },
-        {
-            "constraint": "operational_period",
-            "suggested_changes": [
-                {
-                    "day": "monday",
-                    "start_time": "07:00",
-                    "end_time": "17:00"
-                }
-            ]
+          "day": "Tuesday",
+          "start_time": "10:00",
+          "end_time": "11:00"
         }
-    ]
+      ]
+    },
+    {
+      "action": "REDUCE_FREE_PERIODS",
+      "description": "Consider reducing the number or duration of requested free periods to accommodate all required courses",
+      "impact": "Allows scheduling all required courses but reduces student break time"
+    },
+    {
+      "action": "EXTEND_OPERATIONAL_HOURS",
+      "target_day": "Friday",
+      "proposed_change": {
+        "new_end_time": "18:00"
+      },
+      "impact": "Creates additional capacity to honor free period requests"
+    }
+  ]
 }

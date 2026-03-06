@@ -73,18 +73,21 @@
             }
         },
         {
-            "name": "course_max_daily_frequency",
+            "name": "course_daily_frequency",
             "description": "Limits how many times the same course can appear on any given day",
             "examples": {
                 "case_one": {
-                    "max_frequency": 2
+                    "max_frequency": 2,
+                    "min_frequency": 1
                 },
                 "case_two": {
                     "max_frequency": 1,
+                    "min_frequency": 1,
                     "course_exceptions": [
                         {
                             "course_id": "s1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
-                            "max_frequency": 3
+                            "max_frequency": 3,
+                            "min_frequency": 2
                         }
                     ]
                 }

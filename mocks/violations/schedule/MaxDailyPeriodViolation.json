@@ -1,0 +1,25 @@
+    {
+        "type": "max_daily_period_violation",
+        "entity": {
+            "type": "schedule_max_periods_per_day",
+            "day": "wednesday",
+            "max_periods": 5
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "day": "wednesday"
+            }
+        },
+        "evidence": [
+            {
+                "violated_max_periods_rule": {
+                    "day": "wednesday",
+                    "current_periods": 5,
+                    "periods_if_scheduled": 6,
+                    "max_allowed_per_day": 5
+                }
+            }
+        ]
+    }

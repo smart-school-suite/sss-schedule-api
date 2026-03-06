@@ -235,6 +235,7 @@ class RequiredJointPeriodItem(BaseModel):
     day: str
     start_time: str
     end_time: str
+    hall_id: Optional[str] = None  # Backend format; solver may ignore
 
 
 class RequiredJointCoursePeriods(BaseModel):
@@ -245,7 +246,110 @@ class RequiredJointCoursePeriods(BaseModel):
 
 
 # ===========================
-# Request Schema
+# Backend request format (payload sent by backend – examples/test_data)
+# ===========================
+
+
+class BackendTeacher(BaseModel):
+    """Backend: teacher_id + teacher_name (not 'name')."""
+    teacher_id: str
+    teacher_name: str
+
+
+class BackendTeacherPreferredPeriod(BaseModel):
+    """Backend: preferred period without teacher_name (looked up from teachers)."""
+    teacher_id: str
+    day: str
+    start_time: str
+    end_time: str
+
+
+class BackendTeacherBusyPeriod(BaseModel):
+    """Backend: teacher_id, day, times (no teacher_name)."""
+    teacher_id: str
+    day: str
+    start_time: str
+    end_time: str
+
+
+class BackendTeacherCourse(BaseModel):
+    """Backend: course_name, course_type as list (e.g. ['Theoritical','Practical'])."""
+    teacher_id: str
+    course_id: str
+    course_name: str
+    course_type: List[str]  # e.g. ["Theoritical", "Practical"]
+    course_credit: Optional[int] = 1
+    course_hours: Optional[int] = 30
+    teacher_name: Optional[str] = None
+
+
+class BackendHall(BaseModel):
+    """Backend: hall_type as list (e.g. ['Lecture Hall','Practical'])."""
+    hall_id: str
+    hall_name: str
+    hall_capacity: int
+    hall_type: List[str]  # e.g. ["Lecture Hall", "Exam Hall", "Practical"]
+
+
+class BackendOperationalPeriod(BaseModel):
+    """Backend: nested under hard_constraints; uses operational_days."""
+    start_time: str
+    end_time: str
+    day_exceptions: List[OperationalConstraint] = []
+    operational_days: List[str]
+
+
+class BackendBreakPeriod(BaseModel):
+    """Backend: nested under hard_constraints."""
+    start_time: str
+    end_time: str
+    day_exceptions: List[DayFixedBreak] = []
+    no_break_exceptions: List[str] = []
+
+
+class BackendSchedulePeriodDuration(BaseModel):
+    """Backend: schedule_period_duration_minutes under hard_constraints."""
+    duration_minutes: int
+    day_exceptions: List[PeriodDayException] = []
+
+
+class BackendRequiredJointPeriodItem(BaseModel):
+    """Backend: period item with optional hall_id."""
+    day: str
+    start_time: str
+    end_time: str
+    hall_id: Optional[str] = None
+
+
+class BackendRequiredJointCoursePeriods(BaseModel):
+    """Backend: same idea as RequiredJointCoursePeriods (nested under hard_constraints)."""
+    course_id: str
+    teacher_id: str
+    periods: List[BackendRequiredJointPeriodItem]
+
+
+class BackendHardConstraints(BaseModel):
+    """Backend: operational_period, break_period, duration, required_joint at once."""
+    operational_period: BackendOperationalPeriod
+    break_period: BackendBreakPeriod
+    schedule_period_duration_minutes: BackendSchedulePeriodDuration
+    required_joint_course_periods: List[BackendRequiredJointCoursePeriods] = []
+
+
+class BackendScheduleRequest(BaseModel):
+    """Request body format sent by backend (matches examples/test_data)."""
+    teachers: List[BackendTeacher]
+    teacher_preferred_periods: Optional[List[BackendTeacherPreferredPeriod]] = None
+    teacher_courses: List[BackendTeacherCourse]
+    teacher_busy_periods: List[BackendTeacherBusyPeriod] = []
+    halls: List[BackendHall]
+    hall_busy_periods: List[HallBusyPeriod] = []
+    hard_constraints: BackendHardConstraints
+    soft_constraints: Optional[Union[SoftConstraints, Dict[str, Any]]] = None
+
+
+# ===========================
+# Request Schema (internal / legacy)
 # ===========================
 
 class SchedulingRequest(BaseModel):
@@ -261,6 +365,137 @@ class SchedulingRequest(BaseModel):
     periods: Optional[Periods] = None  # Optional slot duration configuration
     soft_constrains: SoftConstraints = SoftConstraints()
     required_joint_course_periods: List[RequiredJointCoursePeriods] = []
+
+
+def backend_request_to_scheduling_request(backend: BackendScheduleRequest) -> SchedulingRequest:
+    """Convert backend payload (examples/test_data format) to internal SchedulingRequest."""
+    teacher_by_id: Dict[str, str] = {t.teacher_id: t.teacher_name for t in backend.teachers}
+
+    def course_type_from_list(types: List[str]) -> str:
+        if not types:
+            return "theory"
+        first = (types[0] or "").strip().lower()
+        if "practical" in first or first == "practical" or first == "lab":
+            return "practical"
+        return "theory"
+
+    def hall_type_from_list(types: List[str]) -> str:
+        if not types:
+            return "lecture"
+        for t in types:
+            s = (t or "").strip().lower()
+            if "practical" in s or s == "lab":
+                return "lab"
+            if "lecture" in s or "hall" in s or s == "lecture":
+                return "lecture"
+        return "lecture"
+
+    teachers = [Teacher(teacher_id=t.teacher_id, name=t.teacher_name) for t in backend.teachers]
+
+    teacher_prefered_teaching_period = []
+    for p in backend.teacher_preferred_periods or []:
+        teacher_prefered_teaching_period.append(TeacherPreferredTeachingPeriod(
+            start_time=p.start_time,
+            end_time=p.end_time,
+            day=p.day.lower(),
+            teacher_id=p.teacher_id,
+            teacher_name=teacher_by_id.get(p.teacher_id, ""),
+        ))
+
+    teacher_busy_period = [
+        TeacherBusyPeriod(
+            start_time=b.start_time,
+            end_time=b.end_time,
+            day=b.day.lower(),
+            teacher_id=b.teacher_id,
+            teacher_name=teacher_by_id.get(b.teacher_id, ""),
+        )
+        for b in backend.teacher_busy_periods
+    ]
+
+    teacher_courses = [
+        TeacherCourse(
+            course_id=c.course_id,
+            course_title=c.course_name,
+            course_credit=c.course_credit or 1,
+            course_type=course_type_from_list(c.course_type),
+            course_hours=c.course_hours or 30,
+            teacher_id=c.teacher_id,
+            teacher_name=c.teacher_name or teacher_by_id.get(c.teacher_id, ""),
+        )
+        for c in backend.teacher_courses
+    ]
+
+    halls = [
+        Hall(
+            hall_id=h.hall_id,
+            hall_name=h.hall_name,
+            hall_capacity=h.hall_capacity,
+            hall_type=hall_type_from_list(h.hall_type),
+        )
+        for h in backend.halls
+    ]
+
+    hc = backend.hard_constraints
+    break_period = BreakPeriod(
+        start_time=hc.break_period.start_time,
+        end_time=hc.break_period.end_time,
+        daily=True,
+        no_break_exceptions=hc.break_period.no_break_exceptions or None,
+        day_exceptions=hc.break_period.day_exceptions or None,
+    )
+    operational_period = OperationalPeriod(
+        start_time=hc.operational_period.start_time,
+        end_time=hc.operational_period.end_time,
+        daily=True,
+        days=hc.operational_period.operational_days,
+        day_exceptions=hc.operational_period.day_exceptions or None,
+    )
+    periods = Periods(
+        duration_minutes=hc.schedule_period_duration_minutes.duration_minutes,
+        day_exceptions=hc.schedule_period_duration_minutes.day_exceptions or None,
+    )
+
+    # Only include required_joint_course_periods that reference a (course_id, teacher_id) in teacher_courses
+    course_teacher_pairs = {(c.course_id, c.teacher_id) for c in backend.teacher_courses}
+    required_joint_course_periods = [
+        RequiredJointCoursePeriods(
+            course_id=item.course_id,
+            teacher_id=item.teacher_id,
+            periods=[
+                RequiredJointPeriodItem(
+                    day=p.day,
+                    start_time=p.start_time,
+                    end_time=p.end_time,
+                    hall_id=getattr(p, "hall_id", None),
+                )
+                for p in item.periods
+            ],
+        )
+        for item in hc.required_joint_course_periods
+        if (item.course_id, item.teacher_id) in course_teacher_pairs
+    ]
+
+    soft_constrains = SoftConstraints()
+    if backend.soft_constraints is not None:
+        if isinstance(backend.soft_constraints, dict):
+            soft_constrains = SoftConstraints(**{k: v for k, v in backend.soft_constraints.items() if v is not None})
+        else:
+            soft_constrains = backend.soft_constraints
+
+    return SchedulingRequest(
+        teacher_prefered_teaching_period=teacher_prefered_teaching_period,
+        teachers=teachers,
+        teacher_busy_period=teacher_busy_period,
+        teacher_courses=teacher_courses,
+        halls=halls,
+        hall_busy_periods=backend.hall_busy_periods,
+        break_period=break_period,
+        operational_period=operational_period,
+        periods=periods,
+        soft_constrains=soft_constrains,
+        required_joint_course_periods=required_joint_course_periods,
+    )
 
 
 # ===========================

@@ -1,14 +1,12 @@
 {
-    "status": "PARTIAL",
+    "status": "partial",
     "timetable": [
         {
-            "day": "Monday",
+            "day": "monday",
             "slots": [
                 {
-                    "day": "Monday",
                     "start_time": "10:00",
                     "end_time": "11:00",
-                    "break": false,
                     "teacher_id": "abababab-cdcd-efef-0101-232323232323",
                     "teacher_name": "Dr. Noor",
                     "course_id": "aabbccdd-eeff-0011-2233-445566778899",
@@ -17,17 +15,13 @@
                     "hall_name": "Security Lab"
                 },
                 {
-                    "day": "Monday",
                     "start_time": "11:00",
                     "end_time": "11:15",
-                    "break": true,
-                    "duration": null
+                    "break": true
                 },
                 {
-                    "day": "Monday",
                     "start_time": "11:15",
                     "end_time": "12:15",
-                    "break": false,
                     "teacher_id": "12121212-3434-5656-7878-909090909090",
                     "teacher_name": "Ms. Patel",
                     "course_id": "22334455-6677-8899-aabb-ccddeeff0011",
@@ -38,13 +32,11 @@
             ]
         },
         {
-            "day": "Friday",
+            "day": "friday",
             "slots": [
                 {
-                    "day": "Friday",
                     "start_time": "15:00",
                     "end_time": "15:45",
-                    "break": false,
                     "teacher_id": "13131313-2424-3535-4646-575757575757",
                     "teacher_name": "Dr. Beck",
                     "course_id": "33445566-7788-99aa-bbcc-ddeeff112233",
@@ -53,17 +45,13 @@
                     "hall_name": "High Performance Lab"
                 },
                 {
-                    "day": "Friday",
                     "start_time": "15:45",
                     "end_time": "16:00",
-                    "break": true,
-                    "duration": null
+                    "break": true
                 },
                 {
-                    "day": "Friday",
                     "start_time": "16:00",
                     "end_time": "17:30",
-                    "break": false,
                     "teacher_id": "14141414-2525-3636-4747-585858585858",
                     "teacher_name": "Prof. Ortiz",
                     "course_id": "44556677-8899-aabb-ccdd-eeff33445566",
@@ -244,7 +232,6 @@
             ]
         },
         "summary": {
-            "message": "Timetable generated, but some preferences could not be met.",
             "hard_constraints_met": true,
             "soft_constraints_met": false,
             "failed_soft_constraints_count": 1,
