@@ -1,0 +1,25 @@
+    {
+        "type": "max_teacher_weekly_hour_violation",
+        "entity": {
+            "type": "teacher_max_weekly_hours",
+            "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+            "max_weekly_hours": 20
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "day": "wednesday",
+                "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+            }
+        },
+        "evidence": [
+            {
+                "violated_teacher_weekly_hours_rule": {
+                    "current_weekly_hours": 19,
+                    "hours_if_scheduled": 20,
+                    "max_allowed_per_week": 20
+                }
+            }
+        ]
+    }

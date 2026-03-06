@@ -1,47 +1,9 @@
 {
-  "status": "ERROR",
+  "status": "error",
   "timetable": [],
   "diagnostics": {
     "constraints": {
-      "hard": [
-        {
-          "constraint_failed": {
-            "type": "OPERATIONAL_PERIOD_VIOLATION",
-            "details": {
-              "message": "Insufficient operational hours to accommodate all required course sessions"
-            }
-          },
-          "blockers": [
-            {
-              "type": "INSUFFICIENT_TIME_SLOTS",
-              "entity": {
-                "type": "OPERATIONAL_PERIOD",
-                "details": "Total available hours across week is insufficient"
-              },
-              "conflict": {
-                "required_hours": 120,
-                "available_hours": 90
-              },
-              "evidence": {
-                "operational_hours": {
-                  "start_time": "08:00",
-                  "end_time": "17:00",
-                  "days": ["monday", "tuesday", "wednesday", "thursday", "friday"]
-                }
-              }
-            }
-          ],
-          "suggestions": [
-            {
-              "action": "EXTEND_OPERATIONAL_HOURS",
-              "description": "Extend operational hours or add Saturday to accommodate all courses",
-              "proposed_change": {
-                "end_time": "19:00"
-              }
-            }
-          ]
-        }
-      ],
+      "hard": [],
       "soft": []
     },
     "summary": {

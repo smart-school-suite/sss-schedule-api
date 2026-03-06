@@ -1,0 +1,25 @@
+    {
+        "type": "period_duration_violation",
+        "entity": {
+            "type": "schedule_period_duration_minutes",
+            "duration_minutes": 60,
+            "day": "monday"
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "10:00",
+                "end_time": "11:30",
+                "day": "monday"
+            },
+            "duration_minutes": 30
+        },
+        "evidence": [
+            {
+                "violated_duration_rule": {
+                    "day": "monday",
+                    "allowed_minutes": 60,
+                    "requested_duration_minutes": 30
+                }
+            }
+        ]
+    }

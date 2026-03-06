@@ -1,0 +1,44 @@
+{
+    "type": "requested_assignment_violation",
+    "entity": {
+        "type": "requested_fixed_assignment",
+        "fixed_assignment": {
+            "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+            "start_time": "10:00",
+            "end_time": "11:00",
+            "day": "monday",
+            "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+            "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+        }
+    },
+    "conflict": {
+        "attempted_assignment": {
+            "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+            "start_time": "14:00",
+            "end_time": "15:00",
+            "day": "monday",
+            "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+            "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+        }
+    },
+    "evidence": [
+        {
+            "violated_fixed_assignment": {
+                "required": {
+                    "start_time": "10:00",
+                    "end_time": "11:00",
+                    "day": "monday",
+                    "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+                },
+                "attempted": {
+                    "start_time": "14:00",
+                    "end_time": "15:00",
+                    "day": "monday",
+                    "hall_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,77 @@
+{
+  "constraint_failed": {
+    "constraint": "schedule_max_free_periods_per_day",
+    "details": {
+      "max_free_periods": 1,
+      "day": "monday"
+    }
+  },
+  "blockers": [
+    {
+      "type": "operational_period_violation",
+      "entity": {
+        "type": "operational_period",
+        "slots": [
+          {
+            "day": "monday",
+            "start_time": "08:00",
+            "end_time": "15:00"
+          },
+          {
+            "day": "tuesday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          },
+          {
+            "day": "wednesday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          },
+          {
+            "day": "thursday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          },
+          {
+            "day": "friday",
+            "start_time": "08:00",
+            "end_time": "17:00"
+          }
+        ]
+      },
+      "conflict": {
+        "requested_slot": {
+          "start_time": "07:00",
+          "end_time": "07:30",
+          "day": "monday"
+        }
+      },
+      "evidence": {
+        "day": "monday",
+        "start_time": "08:00",
+        "end_time": "15:00"
+      }
+    }
+  ],
+  "suggestions": [
+    {
+      "constraint": "schedule_max_free_periods_per_day",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "max_free_periods":2
+        }
+      ]
+    },
+    {
+      "constraint": "operational_period",
+      "suggested_changes": [
+        {
+          "day": "monday",
+          "start_time": "07:00",
+          "end_time": "17:00"
+        }
+      ]
+    }
+  ]
+}

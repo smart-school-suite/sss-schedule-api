@@ -1,0 +1,20 @@
+    {
+        "type": "teacher_course_violation",
+        "entity": {
+            "type": "teacher_course",
+            "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+            "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+        },
+        "conflict": {
+            "teacher_course_assignment": {
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+                "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+            }
+        },
+        "evidence": {
+            "teacher_course_mismatch": {
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+                "teacher_id": "5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d"
+            }
+        }
+    }

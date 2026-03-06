@@ -1,0 +1,25 @@
+    {
+        "type": "break_period_violation",
+        "entity": {
+            "type": "break_period",
+            "day": "wednesday",
+            "start_time": "12:00",
+            "end_time": "13:00"
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "12:00",
+                "end_time": "13:00",
+                "day": "wednesday"
+            }
+        },
+        "evidence": [
+            {
+                "protected_break_period": {
+                    "day": "wednesday",
+                    "start_time": "12:00",
+                    "end_time": "13:00"
+                }
+            }
+        ]
+    }

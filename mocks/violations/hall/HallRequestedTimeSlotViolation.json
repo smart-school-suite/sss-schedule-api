@@ -1,0 +1,36 @@
+    {
+        "type": "hall_requested_time_slot_violation",
+        "entity": {
+            "type": "hall_requested_time_slot",
+            "preferred_slot": {
+                "start_time": "10:00",
+                "end_time": "11:30",
+                "day": "monday",
+                "hall_id": "b44146f9-0d15-4c7c-a1c4-24d898e29d86"
+            }
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "14:00",
+                "end_time": "15:30",
+                "day": "monday",
+                "hall_id": "b44146f9-0d15-4c7c-a1c4-24d898e29d86"
+            }
+        },
+        "evidence": [
+            {
+                "violated_hall_preference": {
+                    "preferred_slot": {
+                        "start_time": "10:00",
+                        "end_time": "11:30",
+                        "day": "monday"
+                    },
+                    "attempted_slot": {
+                        "start_time": "14:00",
+                        "end_time": "15:30",
+                        "day": "monday"
+                    }
+                }
+            }
+        ]
+    }

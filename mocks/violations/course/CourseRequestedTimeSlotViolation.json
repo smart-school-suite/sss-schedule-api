@@ -1,0 +1,36 @@
+    {
+        "type": "course_requested_time_slot_violation",
+        "entity": {
+            "type": "course_requested_time_slot",
+            "preferred_slot": {
+                "start_time": "10:00",
+                "end_time": "11:30",
+                "day": "monday",
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+            }
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "14:00",
+                "end_time": "15:30",
+                "day": "monday",
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+            }
+        },
+        "evidence": [
+            {
+                "violated_preference": {
+                    "preferred_slot": {
+                        "start_time": "10:00",
+                        "end_time": "11:30",
+                        "day": "monday"
+                    },
+                    "attempted_slot": {
+                        "start_time": "14:00",
+                        "end_time": "15:30",
+                        "day": "monday"
+                    }
+                }
+            }
+        ]
+    }

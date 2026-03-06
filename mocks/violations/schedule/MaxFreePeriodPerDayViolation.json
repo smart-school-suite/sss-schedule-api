@@ -1,0 +1,25 @@
+    {
+        "type": "max_daily_free_period_violation",
+        "entity": {
+            "type": "schedule_max_free_periods_per_day",
+            "day": "wednesday",
+            "max_free_periods": 2
+        },
+        "conflict": {
+            "requested_slot": {
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "day": "wednesday"
+            }
+        },
+        "evidence": [
+            {
+                "violated_free_periods_rule": {
+                    "day": "wednesday",
+                    "current_free_periods": 2,
+                    "free_periods_after_scheduling": 3,
+                    "max_allowed_free_periods": 2
+                }
+            }
+        ]
+    }

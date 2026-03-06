@@ -1,0 +1,16 @@
+{
+    "constraint": "requested_time_slots",
+    "entity": {
+        "type": "teacher_course",
+        "teacher_id": "a6797731-1469-430e-bc44-36d5876fadfe",
+        "course_id": "a6797731-1469-430e-bc44-36d5876fadfe"
+    },
+    "current_value": {
+        "teacher_id": "a6797731-1469-430e-bc44-36d5876fadfe",
+        "course_id": "a6797731-1469-430e-bc44-36d5876fadfe"
+    },
+    "suggested_value": {
+        "teacher_id": "a6797731-1469-430e-bc44-36d5876fadfe",
+        "course_id": "a6797731-1469-430e-bc44-36d5876fadfe"
+    }
+}

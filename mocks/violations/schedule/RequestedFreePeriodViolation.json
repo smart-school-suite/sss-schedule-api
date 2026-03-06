@@ -1,0 +1,36 @@
+    {
+        "type": "requested_free_period_violation",
+        "entity": {
+            "type": "requested_free_periods",
+            "protected_free_period": {
+                "day": "wednesday",
+                "start_time": "10:00",
+                "end_time": "11:00"
+            }
+        },
+        "conflict": {
+            "attempted_slot": {
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "day": "wednesday",
+                "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e"
+            }
+        },
+        "evidence": [
+            {
+                "violated_free_period_request": {
+                    "protected_period": {
+                        "day": "wednesday",
+                        "start_time": "10:00",
+                        "end_time": "11:00"
+                    },
+                    "conflicting_assignment": {
+                        "course_id": "8f2d9b1a-3e5c-4a7b-9d1e-2f8a0b3c4d5e",
+                        "start_time": "10:00",
+                        "end_time": "11:00",
+                        "day": "wednesday"
+                    }
+                }
+            }
+        ]
+    }

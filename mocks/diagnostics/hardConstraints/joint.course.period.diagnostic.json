@@ -1,0 +1,39 @@
+{
+  "constraint_failed": {
+    "constraint": "required_joint_course_periods",
+    "details": {
+      "course_id": "7b2e9c1a-8d4f-4a3b-9e1f-6c5d4e3a2b1c",
+      "teacher_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "hall_id": "a1b2c3d4-e5f6-4a5b-bcde-f1e2d3c4b5a6",
+      "period": [
+        {
+          "day": "Monday",
+          "start_time": "07:00",
+          "end_time": "07:30"
+        },
+        {
+          "day": "Wednesday",
+          "start_time": "07:00",
+          "end_time": "07:30"
+        }
+      ]
+    },
+    "blockers": [
+     "operational_period_violation",
+     "period_duration_violation",
+     "break_period_violation"
+    ],
+    "suggestions": [
+      {
+        "constraint": "operational_period",
+        "suggested_changes": [
+          {
+            "day": "monday",
+            "start_time": "07:00",
+            "end_time": "17:00"
+          }
+        ]
+      }
+    ]
+  }
+}
