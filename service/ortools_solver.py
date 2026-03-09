@@ -19,6 +19,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Soft constraint check methods: each is called with (timetable) and appends ConstraintFailure(s) to
+# self._soft_failures. Response shape stays stable (diagnostics.constraints.soft). To add a new soft
+# constraint: implement _check_<name>(self, timetable) and add "_check_<name>" here.
+_SOFT_CONSTRAINT_CHECK_METHODS = [
+    "_check_requested_time_windows_and_assignments",
+    "_check_requested_free_periods",
+]
+
 
 class ORToolsScheduler:
     """
@@ -542,14 +550,58 @@ class ORToolsScheduler:
                 continue
 
             if course_idx not in self.variables or "assignment" not in self.variables[course_idx]:
+                failures.append(ConstraintFailure(
+                    constraint_failed={
+                        "type": "REQUIRED_JOINT_COURSE_PERIODS",
+                        "details": {
+                            "course_id": item.course_id,
+                            "teacher_id": item.teacher_id,
+                            "reason": "Course has no assignment variables (not schedulable).",
+                        },
+                    },
+                    blockers=[
+                        DiagnosticBlocker(
+                            type="COURSE_NOT_SCHEDULABLE",
+                            entity={"type": "COURSE", "course_id": item.course_id, "teacher_id": item.teacher_id},
+                            conflict={"reason": "No assignment variables for this course"},
+                            evidence={},
+                        )
+                    ],
+                    suggestions=[],
+                ))
                 continue
 
             for period in item.periods:
                 day = period.day.lower()
                 slot = self._find_slot_index(day, period.start_time, period.end_time)
                 if slot is None:
-                    # Skip this period: no slot in the grid matches (e.g. wrong duration/alignment).
-                    # Do not fail the whole request; other required periods and schedule can still be built.
+                    # Hard constraint: no slot in the grid matches (wrong duration/alignment or outside operational).
+                    # Fail scheduling when a required joint period has no matching slot.
+                    failures.append(ConstraintFailure(
+                        constraint_failed={
+                            "type": "REQUIRED_JOINT_COURSE_PERIODS",
+                            "details": {
+                                "course_id": item.course_id,
+                                "teacher_id": item.teacher_id,
+                                "day": period.day,
+                                "start_time": period.start_time,
+                                "end_time": period.end_time,
+                                "reason": "No matching slot for this day and time (check operational hours and period duration).",
+                            },
+                        },
+                        blockers=[
+                            DiagnosticBlocker(
+                                type="NO_MATCHING_SLOT",
+                                conflict={
+                                    "day": period.day,
+                                    "start_time": period.start_time,
+                                    "end_time": period.end_time,
+                                },
+                                evidence={},
+                            )
+                        ],
+                        suggestions=[],
+                    ))
                     continue
 
                 # Find any feasible hall for this (course_idx, day, slot)
@@ -578,8 +630,12 @@ class ORToolsScheduler:
                     ))
                     continue
 
-                # Pick first available hall and fix assignment
-                hall_id = next(iter(halls_here))
+                # Prefer requested hall_id if valid; otherwise pick first available
+                hall_id = None
+                if getattr(period, "hall_id", None) and period.hall_id in halls_here:
+                    hall_id = period.hall_id
+                if hall_id is None:
+                    hall_id = next(iter(halls_here))
                 var = self.variables[course_idx]["assignment"][day][slot][hall_id]
                 self.model.Add(var == 1)
 
@@ -588,6 +644,47 @@ class ORToolsScheduler:
     def _add_soft_constraints_and_objective(self):
         """Add soft constraints as weighted objectives."""
         objective_terms = []
+        
+        # Operational day distribution: bonus for each day that has at least one class (spread across operational days)
+        day_has_class = {}
+        for day in self.days:
+            day_has_class[day] = self.model.NewBoolVar(f"day_used_{day}")
+        for day in self.days:
+            day_assignments = []
+            for course_idx in self.variables:
+                if course_idx == "sessions_needed" or not isinstance(course_idx, int):
+                    continue
+                if "assignment" not in self.variables[course_idx]:
+                    continue
+                for slot in self.slots_per_day.get(day, []):
+                    for hall_id in self.variables[course_idx]["assignment"].get(day, {}).get(slot, {}):
+                        var = self.variables[course_idx]["assignment"][day][slot][hall_id]
+                        day_assignments.append(var)
+            if day_assignments:
+                # day_has_class[day] = 1 when at least one class is on this day (so we get bonus for using the day)
+                for var in day_assignments:
+                    self.model.Add(day_has_class[day] >= var)
+            objective_terms.append(day_has_class[day] * 2)  # weight 2: prefer spreading across days
+        
+        # Daily schedule distribution: prefer earlier slots (fill from start) and post-break slots (don't leave empty)
+        max_slots_per_day = max(len(self.slots_per_day.get(d, [])) for d in self.days) if self.days else 0
+        for day in self.days:
+            slots_this_day = self.slots_per_day.get(day, [])
+            for slot_idx in slots_this_day:
+                # Prefer earlier slots: higher weight for smaller slot index (fill from start)
+                earlier_weight = max(1, max_slots_per_day - slot_idx) if max_slots_per_day else 0
+                post_break_bonus = 1 if self._is_slot_after_break(day, slot_idx) else 0
+                for course_idx in self.variables:
+                    if course_idx == "sessions_needed" or not isinstance(course_idx, int):
+                        continue
+                    if "assignment" not in self.variables[course_idx]:
+                        continue
+                    for hall_id in self.variables[course_idx]["assignment"].get(day, {}).get(slot_idx, {}):
+                        var = self.variables[course_idx]["assignment"][day][slot_idx][hall_id]
+                        if earlier_weight > 0:
+                            objective_terms.append(var * earlier_weight)
+                        if post_break_bonus > 0:
+                            objective_terms.append(var * post_break_bonus)
         
         # If respecting preferences, add bonus for matching preferred times
         if self.respect_preferences and self.request.teacher_prefered_teaching_period:
@@ -845,6 +942,29 @@ class ORToolsScheduler:
                 if s and e:
                     return (s, e)
         return None
+
+    def _get_break_end_for_day(self, day: str) -> Optional[time]:
+        """Return break end time for day, or None if no break (e.g. no_break_exceptions)."""
+        day_lower = day.lower()
+        if day_lower in self._get_no_break_days():
+            return None
+        override = self._get_break_day_override(day)
+        if override:
+            return self._parse_time(override[1])
+        if self._parse_bool(self.request.break_period.daily):
+            return self._parse_time(self.request.break_period.end_time)
+        return None
+
+    def _is_slot_after_break(self, day: str, slot_idx: int) -> bool:
+        """True if this slot starts at or after break end (post-break slot)."""
+        break_end = self._get_break_end_for_day(day)
+        if break_end is None:
+            return False
+        if day not in self.slot_times or slot_idx not in self.slot_times[day]:
+            return False
+        slot_start_str, _ = self.slot_times[day][slot_idx]
+        slot_start = self._parse_time(slot_start_str)
+        return slot_start >= break_end
 
     def _is_slot_in_break_period(self, day: str, slot_start: time, slot_end: time) -> bool:
         """Check if a slot overlaps with break period. Order: no_break_exceptions, then day_exceptions, else default."""
@@ -1138,9 +1258,9 @@ class ORToolsScheduler:
                     ))
                     break
 
-        # Requested placement soft checks (post-solve: compare timetable to requested windows/assignments/free periods)
-        self._check_requested_time_windows_and_assignments(timetable)
-        self._check_requested_free_periods(timetable)
+        # Registered soft checks (post-solve): each appends to self._soft_failures; response shape unchanged
+        for _method_name in _SOFT_CONSTRAINT_CHECK_METHODS:
+            getattr(self, _method_name)(timetable)
 
     def _teaching_slots_from_timetable(self, timetable: List[DaySchedule]) -> List[Dict]:
         """Return list of teaching slot dicts: day, start_time, end_time, teacher_id, hall_id, course_id."""
@@ -1190,7 +1310,7 @@ class ORToolsScheduler:
         teaching = self._teaching_slots_from_timetable(timetable)
         sc = self.request.soft_constrains
 
-        # course_requested_time_slots: list of { course_id, slots: [{ day, start_time?, end_time? }] }
+        # course_requested_time_slots: list of { course_id, slots: [{ day, start_time?, end_time? }] } (or requested_time_slots)
         course_requested = getattr(sc, "course_requested_time_slots", None) or []
         if isinstance(course_requested, list):
             for item in course_requested:
@@ -1199,7 +1319,7 @@ class ORToolsScheduler:
                 cid = item.get("course_id")
                 if not cid:
                     continue
-                slots_spec = item.get("slots") or []
+                slots_spec = item.get("slots") or item.get("requested_time_slots") or []
                 for t in teaching:
                     if t.get("course_id") != cid:
                         continue
@@ -1221,7 +1341,14 @@ class ORToolsScheduler:
                             break
                     if not matched:
                         self._soft_failures.append(ConstraintFailure(
-                            constraint_failed={"type": "course_requested_time_slots", "details": {"course_id": cid}},
+                            constraint_failed={
+                                "type": "course_requested_time_slots",
+                                "details": {
+                                    "course_id": cid,
+                                    "reason": "Course was scheduled outside requested time slots",
+                                    "scheduled_at": {"day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                },
+                            },
                             blockers=[
                                 DiagnosticBlocker(
                                     type="COURSE_SCHEDULED_OUTSIDE_REQUESTED_SLOTS",
@@ -1258,7 +1385,18 @@ class ORToolsScheduler:
                 )
                 if not found:
                     self._soft_failures.append(ConstraintFailure(
-                        constraint_failed={"type": "requested_assignments", "details": {"course_id": cid, "teacher_id": tid, "hall_id": hid, "day": rday, "start_time": rstart, "end_time": rend}},
+                        constraint_failed={
+                            "type": "requested_assignments",
+                            "details": {
+                                "course_id": cid,
+                                "teacher_id": tid,
+                                "hall_id": hid,
+                                "day": rday,
+                                "start_time": rstart,
+                                "end_time": rend,
+                                "reason": "Requested assignment (course, teacher, hall at day/time) was not satisfied in the timetable.",
+                            },
+                        },
                         blockers=[
                             DiagnosticBlocker(
                                 type="REQUESTED_ASSIGNMENT_NOT_SATISFIED",
@@ -1270,14 +1408,14 @@ class ORToolsScheduler:
                         suggestions=[],
                     ))
 
-        # teacher_requested_time_windows: list of { teacher_id, windows: [{ day, start_time?, end_time? }] }
+        # teacher_requested_time_windows: list of { teacher_id, windows: [...] } (or requested_time_windows)
         teacher_windows = getattr(sc, "teacher_requested_time_windows", None) or []
         if isinstance(teacher_windows, list):
             for tw in teacher_windows:
                 if not isinstance(tw, dict):
                     continue
                 teacher_id = tw.get("teacher_id")
-                windows = tw.get("windows") or []
+                windows = tw.get("windows") or tw.get("requested_time_windows") or []
                 for t in teaching:
                     if t.get("teacher_id") != teacher_id:
                         continue
@@ -1290,7 +1428,14 @@ class ORToolsScheduler:
                     )
                     if not matched:
                         self._soft_failures.append(ConstraintFailure(
-                            constraint_failed={"type": "teacher_requested_time_windows", "details": {"teacher_id": teacher_id}},
+                            constraint_failed={
+                                "type": "teacher_requested_time_windows",
+                                "details": {
+                                    "teacher_id": teacher_id,
+                                    "reason": "Teacher was scheduled outside requested time windows",
+                                    "scheduled_at": {"day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                },
+                            },
                             blockers=[
                                 DiagnosticBlocker(
                                     type="TEACHER_SCHEDULED_OUTSIDE_REQUESTED_WINDOWS",
@@ -1304,14 +1449,14 @@ class ORToolsScheduler:
                         break
                 break
 
-        # hall_requested_time_windows: list of { hall_id, windows: [{ day, start_time?, end_time? }] }
+        # hall_requested_time_windows: list of { hall_id, windows: [...] } (or requested_time_windows)
         hall_windows = getattr(sc, "hall_requested_time_windows", None) or []
         if isinstance(hall_windows, list):
             for hw in hall_windows:
                 if not isinstance(hw, dict):
                     continue
                 hall_id = hw.get("hall_id")
-                windows = hw.get("windows") or []
+                windows = hw.get("windows") or hw.get("requested_time_windows") or []
                 for t in teaching:
                     if t.get("hall_id") != hall_id:
                         continue
@@ -1324,7 +1469,14 @@ class ORToolsScheduler:
                     )
                     if not matched:
                         self._soft_failures.append(ConstraintFailure(
-                            constraint_failed={"type": "hall_requested_time_windows", "details": {"hall_id": hall_id}},
+                            constraint_failed={
+                                "type": "hall_requested_time_windows",
+                                "details": {
+                                    "hall_id": hall_id,
+                                    "reason": "Hall was scheduled outside requested time windows",
+                                    "scheduled_at": {"day": t["day"], "start_time": t["start_time"], "end_time": t["end_time"]},
+                                },
+                            },
                             blockers=[
                                 DiagnosticBlocker(
                                     type="HALL_SCHEDULED_OUTSIDE_REQUESTED_WINDOWS",
@@ -1359,7 +1511,16 @@ class ORToolsScheduler:
                     continue
                 if self._slot_overlaps_window(t["day"], t["start_time"], t["end_time"], t["day"], req_start, req_end):
                     self._soft_failures.append(ConstraintFailure(
-                        constraint_failed={"type": "requested_free_period", "details": {"day": req.get("day"), "start_time": req_start, "end_time": req_end}},
+                        constraint_failed={
+                            "type": "requested_free_period",
+                            "details": {
+                                "day": req.get("day"),
+                                "start_time": req_start,
+                                "end_time": req_end,
+                                "reason": "Requested free period was occupied by a scheduled class",
+                                "occupied_by_course": t.get("course_id"),
+                            },
+                        },
                         blockers=[
                             DiagnosticBlocker(
                                 type="REQUESTED_FREE_PERIOD_OCCUPIED",

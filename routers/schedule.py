@@ -11,6 +11,7 @@ from models.schemas import (
     backend_request_to_scheduling_request,
 )
 from service.ortools_solver import ORToolsScheduler
+from service.validation import validate_soft_constraints_inputs, validate_teacher_preference_required
 
 # Create a router instance
 router = APIRouter()
@@ -23,6 +24,14 @@ def _validation_errors_detail(ve: ValidationError) -> Dict[str, list]:
         key = ".".join(str(x) for x in err.get("loc", []))
         msg = err.get("msg", "")
         out.setdefault(key, []).append(msg)
+    return out
+
+
+def _soft_validation_errors(errors: list) -> Dict[str, list]:
+    """Build {field_path: [msg]} from list of (path, msg) tuples."""
+    out: Dict[str, list] = {}
+    for path, msg in errors:
+        out.setdefault(path, []).append(msg)
     return out
 
 
@@ -57,6 +66,12 @@ async def solve_schedule_with_preference(
     except ValidationError as e:
         return JSONResponse(status_code=422, content={"errors": _validation_errors_detail(e)})
     internal = _normalize_to_internal(request)
+    # With-preference requires non-empty teacher preference data
+    pref_errors = validate_teacher_preference_required(internal.teacher_prefered_teaching_period)
+    soft_errors = validate_soft_constraints_inputs(internal.soft_constrains)
+    all_errors = pref_errors + soft_errors
+    if all_errors:
+        return JSONResponse(status_code=422, content={"errors": _soft_validation_errors(all_errors)})
     scheduler = ORToolsScheduler(respect_preferences=True, time_limit_seconds=30)
     return scheduler.solve_scheduling(internal)
 
@@ -77,5 +92,8 @@ async def solve_schedule_without_preference(
     except ValidationError as e:
         return JSONResponse(status_code=422, content={"errors": _validation_errors_detail(e)})
     internal = _normalize_to_internal(request)
+    soft_errors = validate_soft_constraints_inputs(internal.soft_constrains)
+    if soft_errors:
+        return JSONResponse(status_code=422, content={"errors": _soft_validation_errors(soft_errors)})
     scheduler = ORToolsScheduler(respect_preferences=False, time_limit_seconds=30)
     return scheduler.solve_scheduling(internal)
