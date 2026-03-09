@@ -148,7 +148,10 @@ def test_root_endpoint():
 def test_with_preference_endpoint_minimal():
     """Test /v1/schedule/with-preference with minimal valid request."""
     request_data = get_minimal_request()
-    
+    # With-preference endpoint requires non-empty teacher preference
+    request_data["teacher_prefered_teaching_period"] = [
+        {"teacher_id": "t1", "teacher_name": "John Doe", "day": "monday", "start_time": "09:00", "end_time": "10:00"}
+    ]
     response = client.post("/api/v1/schedule/with-preference", json=request_data)
     
     assert response.status_code == 200
@@ -189,7 +192,7 @@ def test_without_preference_endpoint_minimal():
 def test_with_preference_endpoint_medium():
     """Test /v1/schedule/with-preference with medium-sized request."""
     request_data = get_medium_request()
-    
+    # get_medium_request() already has non-empty teacher_prefered_teaching_period
     response = client.post("/api/v1/schedule/with-preference", json=request_data)
     
     # Print validation errors if any
@@ -219,8 +222,7 @@ def test_without_preference_endpoint_medium():
 
 
 def test_empty_request_returns_error():
-    """Test that empty/invalid request returns proper error."""
-    
+    """Test that empty/invalid request returns proper error (422 validation or 200 with ERROR body)."""
     invalid_request = {
         "teachers": [],
         "teacher_courses": [],
@@ -241,13 +243,13 @@ def test_empty_request_returns_error():
             "constrains": []
         }
     }
-    
     response = client.post("/api/v1/schedule/with-preference", json=invalid_request)
-    
-    assert response.status_code == 200
     data = response.json()
-    # Infeasible/error: status ERROR and hard diagnostics or legacy error_message
-    assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
+    if response.status_code == 422:
+        assert "errors" in data
+    else:
+        assert response.status_code == 200
+        assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
 def test_course_type_hall_type_matching():
@@ -736,6 +738,17 @@ def test_teacher_preferred_period_validation():
     assert data["status"] == "ERROR" or len(data.get("messages", {}).get("error_message", [])) > 0 or len(data.get("diagnostics", {}).get("constraints", {}).get("hard", [])) > 0
 
 
+def test_with_preference_requires_non_empty_teacher_preference():
+    """With-preference endpoint must reject empty or missing teacher_prefered_teaching_period (422)."""
+    request = get_minimal_request()
+    request["teacher_prefered_teaching_period"] = []
+    response = client.post("/api/v1/schedule/with-preference", json=request)
+    assert response.status_code == 422
+    data = response.json()
+    assert "errors" in data
+    assert "teacher_prefered_teaching_period" in data["errors"]
+
+
 def test_multiple_constraints_combined():
     """Test combination of multiple constraints working together."""
     request = get_minimal_request()
@@ -830,12 +843,15 @@ def test_response_shape_matches_spec():
 
 def test_error_response_has_diagnostic_blockers():
     """On ERROR, diagnostics.constraints.hard must contain constraint_failed and blockers (DR-02, DR-03)."""
+    # Use invalid data that passes validation but fails in solver (empty teacher_courses/halls)
     invalid_request = {
-        "teachers": [],
+        "teachers": [{"teacher_id": "t1", "name": "Dummy"}],
         "teacher_courses": [],
         "halls": [],
         "teacher_busy_period": [],
-        "teacher_prefered_teaching_period": [],
+        "teacher_prefered_teaching_period": [
+            {"teacher_id": "t1", "teacher_name": "Dummy", "day": "monday", "start_time": "09:00", "end_time": "10:00"}
+        ],
         "hall_busy_periods": [],
         "break_period": {"start_time": "12:00", "end_time": "13:00", "daily": True},
         "operational_period": {
@@ -913,6 +929,35 @@ def test_required_joint_course_periods_accepts_valid_request():
                     if slot.get("course_id") == "c1" and slot.get("start_time") == "08:00" and slot.get("end_time") == "09:00":
                         break
                 break
+
+
+def test_required_joint_course_periods_fails_when_no_matching_slot():
+    """When a required joint period has no matching slot (e.g. wrong duration), API returns ERROR with diagnostics."""
+    request_data = get_minimal_request()
+    request_data["periods"] = {"daily": True, "period": 60}
+    # 08:00-10:00 is 2 hours; slots are 60 min (08:00-09:00, 09:00-10:00). No single slot matches.
+    request_data["required_joint_course_periods"] = [
+        {
+            "course_id": "c1",
+            "teacher_id": "t1",
+            "periods": [{"day": "monday", "start_time": "08:00", "end_time": "10:00"}],
+        }
+    ]
+    response = client.post("/api/v1/schedule/without-preference", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ERROR"
+    assert "diagnostics" in data
+    hard = data.get("diagnostics", {}).get("constraints", {}).get("hard", [])
+    assert len(hard) >= 1
+    failure = hard[0]
+    assert failure.get("constraint_failed", {}).get("type") == "REQUIRED_JOINT_COURSE_PERIODS"
+    blockers = failure.get("blockers", [])
+    assert any(
+        b.get("type") == "NO_MATCHING_SLOT"
+        or (b.get("conflict", {}).get("start_time") == "08:00" and b.get("conflict", {}).get("end_time") == "10:00")
+        for b in blockers
+    )
 
 
 def test_soft_constraint_teacher_max_daily_hours_produces_partial():
