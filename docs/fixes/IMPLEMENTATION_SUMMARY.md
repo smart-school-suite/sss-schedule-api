@@ -134,6 +134,14 @@ All of these are appended to **`diagnostics.constraints.soft`** and contribute t
 
 ---
 
+## Follow-up: hard-first and distribution (Keron feedback)
+
+- **Hard constraints first, exit early:** The solver already evaluates hard constraints (including required joint course periods) before adding soft objectives or solving. It returns ERROR immediately when any required joint period cannot be placed (no matching slot, no hall, or course_id/teacher_id not in teacher_courses). Soft constraints and objectives are only added after hard constraints pass.
+- **Required joint never ignored:** All `required_joint_course_periods` from the request are now passed to the solver (no filtering by teacher_courses). If a required joint entry references a course_id/teacher_id not in teacher_courses, the solver fails with a clear diagnostic (TEACHER_COURSE_MISMATCH) so the constraint is never silently dropped.
+- **Distribute on all operational days:** The objective weight for “day used” was increased (from 2 to 8) so the solver strongly prefers spreading classes across all operational days. Post-break slot bonus was increased (from 1 to 3) so classes are more likely to be scheduled after the break when capacity remains.
+
+---
+
 ## Mocks and extensibility
 
 - **Response shape is stable:** `diagnostics.constraints.hard` / `soft` are always lists of `ConstraintFailure` (with `constraint_failed`, `blockers`, `suggestions`). New or changed constraints must not change this structure.

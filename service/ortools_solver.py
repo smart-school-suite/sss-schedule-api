@@ -80,6 +80,8 @@ class ORToolsScheduler:
         self._soft_failures = []
 
         try:
+            # Hard constraints first: parse, build slots, validate, then add hard constraints and required joint.
+            # Exit early on any hard failure (e.g. required joint not satisfiable) before soft constraints or solve.
             # Step 1: Parse and validate operational periods
             self._parse_operational_periods()
             
@@ -94,13 +96,13 @@ class ORToolsScheduler:
             # Step 4: Create decision variables
             self._create_variables()
             
-            # Step 5: Add hard constraints
+            # Step 5: Add hard constraints (including required joint course periods)
             self._add_hard_constraints()
             required_failures = self._add_required_joint_period_constraints()
             if required_failures:
                 return self._build_response("ERROR", [], 0.0, hard_failures=required_failures, soft_failures=[])
 
-            # Step 6: Add soft constraints and objective
+            # Step 6: Add soft constraints and objective (only after hard constraints pass)
             self._add_soft_constraints_and_objective()
             
             # Step 7: Solve the model
@@ -664,8 +666,8 @@ class ORToolsScheduler:
                 # day_has_class[day] = 1 when at least one class is on this day (so we get bonus for using the day)
                 for var in day_assignments:
                     self.model.Add(day_has_class[day] >= var)
-            objective_terms.append(day_has_class[day] * 2)  # weight 2: prefer spreading across days
-        
+            objective_terms.append(day_has_class[day] * 8)  # weight 8: strongly prefer using all operational days
+
         # Daily schedule distribution: prefer earlier slots (fill from start) and post-break slots (don't leave empty)
         max_slots_per_day = max(len(self.slots_per_day.get(d, [])) for d in self.days) if self.days else 0
         for day in self.days:
@@ -673,7 +675,7 @@ class ORToolsScheduler:
             for slot_idx in slots_this_day:
                 # Prefer earlier slots: higher weight for smaller slot index (fill from start)
                 earlier_weight = max(1, max_slots_per_day - slot_idx) if max_slots_per_day else 0
-                post_break_bonus = 1 if self._is_slot_after_break(day, slot_idx) else 0
+                post_break_bonus = 3 if self._is_slot_after_break(day, slot_idx) else 0  # stronger bonus for post-break
                 for course_idx in self.variables:
                     if course_idx == "sessions_needed" or not isinstance(course_idx, int):
                         continue
