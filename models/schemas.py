@@ -456,8 +456,9 @@ def backend_request_to_scheduling_request(backend: BackendScheduleRequest) -> Sc
         day_exceptions=hc.schedule_period_duration_minutes.day_exceptions or None,
     )
 
-    # Only include required_joint_course_periods that reference a (course_id, teacher_id) in teacher_courses
-    course_teacher_pairs = {(c.course_id, c.teacher_id) for c in backend.teacher_courses}
+    # Pass all required_joint_course_periods to the solver; do not filter by teacher_courses.
+    # Solver evaluates this hard constraint first and fails with a clear diagnostic (e.g.
+    # TEACHER_COURSE_MISMATCH) when course_id/teacher_id are not in teacher_courses.
     required_joint_course_periods = [
         RequiredJointCoursePeriods(
             course_id=item.course_id,
@@ -473,7 +474,6 @@ def backend_request_to_scheduling_request(backend: BackendScheduleRequest) -> Sc
             ],
         )
         for item in hc.required_joint_course_periods
-        if (item.course_id, item.teacher_id) in course_teacher_pairs
     ]
 
     soft_constrains = SoftConstraints()
