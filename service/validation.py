@@ -45,7 +45,7 @@ def validate_soft_constraints_inputs(soft_constrains: Any) -> List[Tuple[str, st
     for i, tw in enumerate(teacher_windows):
         if not isinstance(tw, dict):
             continue
-        windows = _get(tw.get("windows") or tw.get("requested_time_windows"), [])
+        windows = _get(tw.get("windows") or tw.get("requested_time_windows") or tw.get("time_windows"), [])
         for j, w in enumerate(windows):
             if not isinstance(w, dict):
                 continue
@@ -58,7 +58,7 @@ def validate_soft_constraints_inputs(soft_constrains: Any) -> List[Tuple[str, st
     for i, hw in enumerate(hall_windows):
         if not isinstance(hw, dict):
             continue
-        windows = _get(hw.get("windows") or hw.get("requested_time_windows"), [])
+        windows = _get(hw.get("windows") or hw.get("requested_time_windows") or hw.get("time_windows"), [])
         for j, w in enumerate(windows):
             if not isinstance(w, dict):
                 continue
