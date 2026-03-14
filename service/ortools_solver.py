@@ -893,11 +893,9 @@ class ORToolsScheduler:
         if self._is_slot_in_break_period(day, slot_start, slot_end):
             return False
         
-        # 4. Check teacher preferred times (if in preference mode)
-        if self.respect_preferences:
-            if not self._is_slot_in_teacher_preference(course, day, slot_start, slot_end):
-                return False
-        
+        # Teacher preferred times are enforced as SOFT constraint (objective bonus), not hard.
+        # So we do NOT exclude slots outside preference here; otherwise no variables are created
+        # for post-break slots when preference ends at break, and nothing gets scheduled after break.
         return True
     
     def _times_overlap(self, start1: time, end1: time, start2: time, end2: time) -> bool:
@@ -989,7 +987,7 @@ class ORToolsScheduler:
         return False
     
     def _is_slot_in_teacher_preference(self, course, day: str, slot_start: time, slot_end: time) -> bool:
-        """Check if slot is within teacher's preferred teaching period (strict enforcement)."""
+        """True if slot is within teacher's preferred teaching period. Used for objective bonus only (soft)."""
         # If no preferences specified, allow all slots
         if not self.request.teacher_prefered_teaching_period:
             return True
@@ -1417,7 +1415,7 @@ class ORToolsScheduler:
                 if not isinstance(tw, dict):
                     continue
                 teacher_id = tw.get("teacher_id")
-                windows = tw.get("windows") or tw.get("requested_time_windows") or []
+                windows = tw.get("windows") or tw.get("requested_time_windows") or tw.get("time_windows") or []
                 for t in teaching:
                     if t.get("teacher_id") != teacher_id:
                         continue
@@ -1458,7 +1456,7 @@ class ORToolsScheduler:
                 if not isinstance(hw, dict):
                     continue
                 hall_id = hw.get("hall_id")
-                windows = hw.get("windows") or hw.get("requested_time_windows") or []
+                windows = hw.get("windows") or hw.get("requested_time_windows") or hw.get("time_windows") or []
                 for t in teaching:
                     if t.get("hall_id") != hall_id:
                         continue
